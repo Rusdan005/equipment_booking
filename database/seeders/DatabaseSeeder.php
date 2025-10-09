@@ -13,11 +13,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // ตัวอย่าง factory ที่มีอยู่เดิม
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // เรียกใช้ Seeder อื่น ๆ ที่ต้องการ
+        $this->call(\Database\Seeders\AdminUserSeeder::class);
     }
 }
