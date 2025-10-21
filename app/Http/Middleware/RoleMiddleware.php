@@ -4,23 +4,21 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
     /**
-     * ตรวจสอบสิทธิ์ของผู้ใช้ก่อนเข้าหน้าเฉพาะ role
+     * ตรวจสอบว่า user มี role ที่ระบุหรือไม่
      */
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // ถ้ายังไม่ล็อกอิน
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
+        $user = $request->user();
 
-        // ถ้า role ไม่ตรง เช่นไม่ใช่ admin
-        if (Auth::user()->role !== $role) {
-            return redirect('/dashboard')->with('error', 'คุณไม่มีสิทธิ์เข้าหน้านี้');
+        // ถ้ายังไม่ได้ล็อกอิน หรือ role ไม่ตรง
+        if (!$user || !in_array($user->role, $roles)) {
+            // ❌ ถ้าไม่ผ่าน ให้เด้งกลับหน้าแรกแทน (ไม่ error)
+            return redirect()->route('dashboard')->with('error', 'คุณไม่มีสิทธิ์เข้าหน้านี้');
         }
 
         return $next($request);

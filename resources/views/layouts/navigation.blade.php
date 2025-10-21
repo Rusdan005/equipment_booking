@@ -42,7 +42,14 @@
                     ➕ จองอุปกรณ์ใหม่
                 </a>
 
-            
+                @can('manage-bookings')
+                    <a href="{{ route('manage.bookings.review.index') }}" class="btn-outline px-4 py-2">
+                        📝 พิจารณาการจอง
+                    </a>
+                    <a href="{{ route('manage.bookings.pickup.index') }}" class="btn-outline px-4 py-2">
+                        📦 มารับอุปกรณ์
+                    </a>
+                @endcan
 
                 <a href="#" class="btn-outline px-4 py-2">
                     📊 ตรวจสอบการคืน
@@ -109,6 +116,16 @@
             <x-responsive-nav-link :href="route('booking.create')" :active="request()->routeIs('booking.create')">
                 ➕ จองอุปกรณ์ใหม่
             </x-responsive-nav-link>
+
+            @can('manage-bookings')
+                <x-responsive-nav-link :href="route('manage.bookings.review.index')" :active="request()->routeIs('manage.bookings.review.*')">
+                    📝 พิจารณาการจอง
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('manage.bookings.pickup.index')" :active="request()->routeIs('manage.bookings.pickup.*')">
+                    📦 มารับอุปกรณ์
+                </x-responsive-nav-link>
+            @endcan
+
             <x-responsive-nav-link href="#">
                 📊 รายงานการยืม
             </x-responsive-nav-link>
