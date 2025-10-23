@@ -4,7 +4,7 @@
         background: #fff;
         color: #FF69B4;
         border: 2px solid #FF69B4;
-        border-radius: 9999px; /* กลม */
+        border-radius: 9999px;
         font-weight: 500;
         transition: all 0.25s ease;
         box-shadow: 0 1px 2px rgba(255, 105, 180, 0.1);
@@ -15,10 +15,37 @@
         box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
         transform: scale(1.05);
     }
+
+    /* 🌸 ปุ่มแดชบอร์ดผู้ดูแลระบบ (ตรงกลางบาร์) */
+    .btn-admin-center {
+        background: linear-gradient(90deg, #FF69B4 0%, #ff3c9d 100%);
+        color: #fff;
+        font-weight: 700;
+        padding: 0.6rem 1.5rem;
+        border-radius: 9999px;
+        box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        transition: all 0.25s ease;
+    }
+    .btn-admin-center:hover {
+        transform: scale(1.07);
+        box-shadow: 0 10px 25px rgba(255, 105, 180, 0.55);
+        filter: brightness(1.05);
+    }
 </style>
 
-<nav x-data="{ open: false }" class="bg-gradient-to-r from-pink-50 via-white to-pink-100 border-b border-pink-200 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<nav x-data="{ open: false }" class="relative bg-gradient-to-r from-pink-50 via-white to-pink-100 border-b border-pink-200 shadow-md">
+
+    <!-- 🔹 ปุ่มแดชบอร์ดตรงกลาง (เฉพาะแอดมิน/สตาฟ) -->
+    @if(auth()->user() && in_array(auth()->user()->role, ['admin','staff']))
+        <div class="absolute left-1/2 -translate-x-1/2 -top-5 z-20">
+            <a href="{{ route('admin.dashboard') }}"
+               class="btn-admin-center {{ request()->routeIs('admin.dashboard') ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-pink-200' : '' }}">
+                📊 เข้าสู่แดชบอร์ดผู้ดูแลระบบ
+            </a>
+        </div>
+    @endif
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div class="flex justify-between h-16 items-center">
 
             <!-- 🔹 โลโก้ -->
@@ -32,16 +59,23 @@
                 </a>
             </div>
 
-            <!-- 🔹 เมนูหลัก -->
+            <!-- 🔹 เมนูหลัก (Desktop) -->
             <div class="hidden sm:flex items-center space-x-3">
                 <a href="{{ route('dashboard') }}" class="btn-outline px-4 py-2">
                     🏠 หน้าแรก
                 </a>
 
-                <a href="{{ route('booking.create') }}" class="btn-outline px-4 py-2">
-                    ➕ จองอุปกรณ์ใหม่
-                </a>
+                {{-- ✅ เมนูเฉพาะ "ผู้ใช้ทั่วไป" --}}
+                @cannot('manage-bookings')
+                    <a href="{{ route('booking.create') }}" class="btn-outline px-4 py-2">
+                        ➕ จองอุปกรณ์ใหม่
+                    </a>
+                    <a href="{{ route('pickups.mine') }}" class="btn-outline px-4 py-2">
+                        📅 กำหนดรับอุปกรณ์ของฉัน
+                    </a>
+                @endcannot
 
+                {{-- ✅ เมนูเฉพาะ "แอดมิน/สตาฟ" --}}
                 @can('manage-bookings')
                     <a href="{{ route('manage.bookings.review.index') }}" class="btn-outline px-4 py-2">
                         📝 พิจารณาการจอง
@@ -49,11 +83,19 @@
                     <a href="{{ route('manage.bookings.pickup.index') }}" class="btn-outline px-4 py-2">
                         📦 มารับอุปกรณ์
                     </a>
+                    <a href="{{ route('manage.bookings.history.index') }}" class="btn-outline px-4 py-2">
+                        📜 ประวัติการจองทั้งหมด
+                    </a>
+                    <a href="#" class="btn-outline px-4 py-2">
+                        📊 ตรวจสอบการคืน
+                    </a>
+                    <a href="#" class="btn-outline px-4 py-2">
+                        💰 การคิดค่าปรับ
+                    </a>
+                    <a href="{{ route('manage.masterdata.index') }}" class="btn-outline px-4 py-2">
+                        ⚙️ จัดการข้อมูลพื้นฐาน
+                    </a>
                 @endcan
-
-                <a href="#" class="btn-outline px-4 py-2">
-                    📊 ตรวจสอบการคืน
-                </a>
             </div>
 
             <!-- 🔹 โปรไฟล์ -->
@@ -110,25 +152,41 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 🏠 หน้าแรก
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('booking.index')" :active="request()->routeIs('booking.index')">
-                🎒 รายการอุปกรณ์
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('booking.create')" :active="request()->routeIs('booking.create')">
-                ➕ จองอุปกรณ์ใหม่
-            </x-responsive-nav-link>
 
+            {{-- ✅ เฉพาะผู้ใช้ทั่วไป --}}
+            @cannot('manage-bookings')
+                <x-responsive-nav-link :href="route('booking.create')" :active="request()->routeIs('booking.create')">
+                    ➕ จองอุปกรณ์ใหม่
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pickups.mine')" :active="request()->routeIs('pickups.mine')">
+                    📅 กำหนดรับอุปกรณ์ของฉัน
+                </x-responsive-nav-link>
+            @endcannot
+
+            {{-- ✅ เฉพาะแอดมิน/สตาฟ --}}
             @can('manage-bookings')
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                    📊 แดชบอร์ดผู้ดูแลระบบ
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('manage.bookings.review.index')" :active="request()->routeIs('manage.bookings.review.*')">
                     📝 พิจารณาการจอง
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('manage.bookings.pickup.index')" :active="request()->routeIs('manage.bookings.pickup.*')">
                     📦 มารับอุปกรณ์
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('manage.bookings.history.index')" :active="request()->routeIs('manage.bookings.history.*')">
+                    📜 ประวัติการจองทั้งหมด
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="#">
+                    📊 ตรวจสอบการคืน
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="#">
+                    💰 การคิดค่าปรับ
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('manage.masterdata.index')" :active="request()->routeIs('manage.masterdata.*')">
+                    ⚙️ จัดการข้อมูลพื้นฐาน
+                </x-responsive-nav-link>
             @endcan
-
-            <x-responsive-nav-link href="#">
-                📊 รายงานการยืม
-            </x-responsive-nav-link>
         </div>
 
         <!-- 🔹 ผู้ใช้ -->

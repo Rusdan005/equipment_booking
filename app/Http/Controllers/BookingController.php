@@ -52,4 +52,19 @@ class BookingController extends Controller
 
         return redirect()->route('booking.index')->with('success', 'ทำการจองเรียบร้อยแล้ว!');
     }
+
+    // 📅 🆕 หน้ากำหนดรับอุปกรณ์ของฉัน (User เห็นเอง)
+    public function myPickups()
+    {
+        // ดึงรายการของผู้ใช้เอง ที่อนุมัติแล้ว และยังไม่รับ
+        $bookings = Booking::query()
+            ->where('user_id', Auth::id())
+            ->where('status', 'approved')
+            ->whereNull('picked_up_at')
+            ->orderBy('borrow_date', 'asc')
+            ->get();
+
+        // ส่งข้อมูลไปหน้า bookings/my-pickups.blade.php
+        return view('booking.my-pickups', compact('bookings'));
+    }
 }

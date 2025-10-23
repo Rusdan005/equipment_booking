@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+// ✅ ต้องมีบรรทัดนี้ เพื่อให้สามารถใช้ $this->middleware() ได้
+use App\Http\Controllers\Controller;
+
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class ManageBookingController extends Controller
 {
     /**
-     * ✅ กำหนดให้ต้องล็อกอินก่อนใช้งานทุกฟังก์ชัน
+     * ✅ บังคับให้ต้องล็อกอินก่อนทุกฟังก์ชัน
      */
     public function __construct()
     {
@@ -25,14 +28,15 @@ class ManageBookingController extends Controller
      */
     public function reviewIndex()
     {
-        $this->authorize('manage-bookings'); // ตรวจสิทธิ์
+        $this->authorize('manage-bookings'); // ตรวจสิทธิ์เฉพาะ admin/staff
 
         $bookings = Booking::with(['user', 'equipment'])
             ->where('status', 'pending')
             ->latest()
             ->paginate(10);
 
-        return view('bookings.review-index', compact('bookings'));
+        // ✅ ใช้ view ที่อยู่ใน resources/views/manage/bookings/review/index.blade.php
+        return view('manage.bookings.review.index', compact('bookings'));
     }
 
     /**
@@ -43,11 +47,13 @@ class ManageBookingController extends Controller
         $this->authorize('manage-bookings');
 
         $booking->load(['user', 'equipment']);
-        return view('bookings.review-show', compact('booking'));
+
+        // ✅ ใช้ view ที่อยู่ใน resources/views/manage/bookings/review/show.blade.php
+        return view('manage.bookings.review.show', compact('booking'));
     }
 
     /**
-     * อนุมัติคำขอ
+     * ✅ อนุมัติคำขอ
      */
     public function approve(Booking $booking)
     {
@@ -69,7 +75,7 @@ class ManageBookingController extends Controller
     }
 
     /**
-     * ปฏิเสธคำขอ
+     * ❌ ปฏิเสธคำขอ
      */
     public function reject(Booking $booking, Request $request)
     {
@@ -99,7 +105,7 @@ class ManageBookingController extends Controller
     // ----------------------------------------------------------------------
 
     /**
-     * แสดงรายการคำขอที่อนุมัติแล้ว แต่ยังไม่มารับ
+     * แสดงรายการที่อนุมัติแล้ว แต่ยังไม่มารับ
      */
     public function pickupIndex(Request $request)
     {
@@ -116,11 +122,12 @@ class ManageBookingController extends Controller
 
         $bookings = $query->paginate(10);
 
-        return view('bookings.pickup-index', compact('bookings'));
+        // ✅ ใช้ view ที่อยู่ใน resources/views/manage/bookings/pickup/index.blade.php
+        return view('manage.bookings.pickup.index', compact('bookings'));
     }
 
     /**
-     * ทำเครื่องหมายว่ารับอุปกรณ์แล้ว
+     * ✅ ทำเครื่องหมายว่ารับอุปกรณ์แล้ว
      */
     public function pickup(Booking $booking)
     {
@@ -139,4 +146,33 @@ class ManageBookingController extends Controller
         return redirect()->route('manage.bookings.pickup.index')
             ->with('success', '📦 บันทึกการรับอุปกรณ์เรียบร้อยแล้ว');
     }
+        // ----------------------------------------------------------------------
+    // 📜 ส่วนที่ 3 : ประวัติการจองทั้งหมด (History)
+    // ----------------------------------------------------------------------
+    public function historyIndex(Request $request)
+    {
+        $this->authorize('manage-bookings');
+
+        $query = Booking::with(['user', 'equipment'])
+            ->latest();
+
+        // ✅ ถ้ามีการกรองสถานะ เช่น ?status=approved
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // ✅ ถ้ามีการค้นหา (ชื่อผู้ใช้หรือชื่ออุปกรณ์)
+        if ($request->filled('search')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            })->orWhereHas('equipment', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $bookings = $query->paginate(10);
+
+        return view('manage.bookings.history.index', compact('bookings'));
+    }
+
 }
