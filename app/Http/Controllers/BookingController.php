@@ -31,6 +31,7 @@ class BookingController extends Controller
             'borrow_date' => 'required|date|after_or_equal:today',
             'return_date' => 'required|date|after:borrow_date',
             'purpose' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
         ]);
 
         Booking::create([
@@ -39,9 +40,11 @@ class BookingController extends Controller
             'borrow_date' => $request->borrow_date,
             'return_date' => $request->return_date,
             'purpose' => $request->purpose,
+            'location' => $request->location,
             'status' => 'pending',
         ]);
 
+        // ✅ เมื่อจองแล้วให้อุปกรณ์เป็น “ไม่ว่าง”
         Equipment::where('id', $request->equipment_id)->update(['is_available' => false]);
 
         return redirect()->route('booking.index')->with('success', '🎉 ทำการจองเรียบร้อยแล้ว!');
@@ -57,31 +60,29 @@ class BookingController extends Controller
         return view('booking.return', compact('bookings'));
     }
 
-    // 🟢 อัปเดตสถานะเมื่อคืนอุปกรณ์แล้ว
+    // 🟢 อัปเดตสถานะเมื่อ “คืนอุปกรณ์แล้ว”
     public function markAsReturned($id)
     {
         $booking = Booking::findOrFail($id);
         $booking->status = 'returned';
         $booking->save();
 
-        // ✅ ปล่อยให้อุปกรณ์กลับมา “ว่าง” อีกครั้ง
+        // ✅ ปล่อยอุปกรณ์ให้ว่างอีกครั้ง
         $booking->equipment->update(['is_available' => true]);
 
         return back()->with('success', '✅ อุปกรณ์ถูกทำเครื่องหมายว่าคืนแล้ว!');
     }
 
-    // 📅 🆕 หน้ากำหนดรับอุปกรณ์ของฉัน (User เห็นเอง)
+    // 📦 แสดงหน้ารายการอุปกรณ์ที่ฉันรับแล้ว (ตรงกับ my-pickups.blade.php)
     public function myPickups()
     {
-        // ดึงรายการของผู้ใช้เอง ที่อนุมัติแล้ว และยังไม่รับ
-        $bookings = Booking::query()
+        $bookings = Booking::with('equipment')
             ->where('user_id', Auth::id())
-            ->where('status', 'approved')
-            ->whereNull('picked_up_at')
+            ->whereIn('status', ['approved', 'picked_up']) // แสดงเฉพาะที่อนุมัติแล้วหรือรับไปแล้ว
             ->orderBy('borrow_date', 'asc')
             ->get();
 
-        // ส่งข้อมูลไปหน้า bookings/my-pickups.blade.php
+        // ✅ ส่งไปยัง resources/views/booking/my-pickups.blade.php
         return view('booking.my-pickups', compact('bookings'));
     }
 }

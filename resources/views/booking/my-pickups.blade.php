@@ -40,7 +40,7 @@
     <div class="py-8 bg-gradient-to-b from-pink-50 via-white to-pink-100 min-h-screen">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             
-            {{-- ถ้าไม่มีข้อมูล --}}
+            {{-- 🔸 ถ้าไม่มีข้อมูล --}}
             @if($bookings->isEmpty())
                 <div class="bg-white border border-pink-200 rounded-2xl p-10 text-center shadow-sm">
                     <p class="text-gray-500 text-lg">
@@ -48,7 +48,7 @@
                     </p>
                 </div>
             @else
-                {{-- แสดงรายการ --}}
+                {{-- 🔸 แสดงรายการอุปกรณ์ --}}
                 <div class="grid gap-6">
                     @foreach($bookings as $b)
                         <div class="card p-6">
@@ -74,12 +74,12 @@
                                 <div class="text-right">
                                     <p class="text-gray-500 text-sm">📆 วันนัดรับ:</p>
                                     <p class="text-lg font-semibold text-[#FF69B4]">
-                                        {{ optional($b->borrow_date)->format('d/m/Y') }}
+                                        {{ \Carbon\Carbon::parse($b->borrow_date)->format('d/m/Y') }}
                                     </p>
 
                                     <p class="text-gray-500 text-sm mt-2">🔁 กำหนดคืน:</p>
                                     <p class="text-base font-semibold text-[#E17055]">
-                                        {{ optional($b->return_date)->format('d/m/Y') }}
+                                        {{ \Carbon\Carbon::parse($b->return_date)->format('d/m/Y') }}
                                     </p>
 
                                     <div class="mt-3">
@@ -94,7 +94,7 @@
                                 </div>
                             </div>
 
-                            {{-- โค้ดรับอุปกรณ์ --}}
+                            {{-- 🔑 โค้ดรับอุปกรณ์ --}}
                             @if(!empty($b->pickup_code))
                                 <div class="mt-5 bg-pink-50 border border-pink-200 text-pink-700 rounded-xl px-4 py-3 flex items-center gap-2">
                                     <span class="text-xl">🔑</span>
