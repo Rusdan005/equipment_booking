@@ -7,12 +7,12 @@
 
     <style>
         .btn-primary {
-            background: #3B82F6;
+            background: #ff3c9d;
             color: white;
             transition: 0.25s;
         }
         .btn-primary:hover {
-            background: #2563EB;
+            background: #ff3c9d;
             transform: scale(1.05);
             box-shadow: 0 4px 10px rgba(59,130,246,0.3);
         }
