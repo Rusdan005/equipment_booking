@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers;
 
-// ✅ ต้องมีบรรทัดนี้ เพื่อให้สามารถใช้ $this->middleware() ได้
-use App\Http\Controllers\Controller;
-
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +32,6 @@ class ManageBookingController extends Controller
             ->latest()
             ->paginate(10);
 
-        // ✅ ใช้ view ที่อยู่ใน resources/views/manage/bookings/review/index.blade.php
         return view('manage.bookings.review.index', compact('bookings'));
     }
 
@@ -45,10 +41,7 @@ class ManageBookingController extends Controller
     public function reviewShow(Booking $booking)
     {
         $this->authorize('manage-bookings');
-
         $booking->load(['user', 'equipment']);
-
-        // ✅ ใช้ view ที่อยู่ใน resources/views/manage/bookings/review/show.blade.php
         return view('manage.bookings.review.show', compact('booking'));
     }
 
@@ -122,7 +115,6 @@ class ManageBookingController extends Controller
 
         $bookings = $query->paginate(10);
 
-        // ✅ ใช้ view ที่อยู่ใน resources/views/manage/bookings/pickup/index.blade.php
         return view('manage.bookings.pickup.index', compact('bookings'));
     }
 
@@ -146,33 +138,48 @@ class ManageBookingController extends Controller
         return redirect()->route('manage.bookings.pickup.index')
             ->with('success', '📦 บันทึกการรับอุปกรณ์เรียบร้อยแล้ว');
     }
-        // ----------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------
     // 📜 ส่วนที่ 3 : ประวัติการจองทั้งหมด (History)
     // ----------------------------------------------------------------------
     public function historyIndex(Request $request)
     {
         $this->authorize('manage-bookings');
 
-        $query = Booking::with(['user', 'equipment'])
-            ->latest();
+        $query = Booking::with(['user', 'equipment'])->latest();
 
-        // ✅ ถ้ามีการกรองสถานะ เช่น ?status=approved
+        // ✅ กรองสถานะ (ถ้ามี)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // ✅ ถ้ามีการค้นหา (ชื่อผู้ใช้หรือชื่ออุปกรณ์)
+        // ✅ ค้นหาชื่อผู้ใช้หรือชื่ออุปกรณ์
         if ($request->filled('search')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            })->orWhereHas('equipment', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('user', function ($u) use ($request) {
+                    $u->where('name', 'like', '%' . $request->search . '%');
+                })->orWhereHas('equipment', function ($e) use ($request) {
+                    $e->where('name', 'like', '%' . $request->search . '%');
+                });
             });
         }
 
         $bookings = $query->paginate(10);
-
         return view('manage.bookings.history.index', compact('bookings'));
     }
 
+    // ----------------------------------------------------------------------
+    // 📊 ส่วนที่ 4 : ตรวจสอบการคืนอุปกรณ์ (Returns)
+    // ----------------------------------------------------------------------
+    public function returnsIndex()
+    {
+        $this->authorize('manage-bookings');
+
+        $bookings = Booking::with(['user', 'equipment'])
+            ->whereIn('status', ['returned', 'overdue'])
+            ->orderByDesc('returned_at')
+            ->paginate(10);
+
+        return view('manage.bookings.returns.index', compact('bookings'));
+    }
 }

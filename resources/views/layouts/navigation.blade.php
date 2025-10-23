@@ -86,17 +86,16 @@
                     <a href="{{ route('manage.bookings.history.index') }}" class="btn-outline px-4 py-2">
                         📜 ประวัติการจองทั้งหมด
                     </a>
-                    <a href="#" class="btn-outline px-4 py-2">
+                    <a href="{{ route('booking.return.list') }}" class="btn-outline px-4 py-2">
                         📊 ตรวจสอบการคืน
                     </a>
-                    <a href="#" class="btn-outline px-4 py-2">
+                    <a href="{{ route('manage.fines.index') }}" class="btn-outline px-4 py-2">
                         💰 การคิดค่าปรับ
                     </a>
                     <a href="{{ route('manage.masterdata.index') }}" class="btn-outline px-4 py-2">
                         ⚙️ จัดการข้อมูลพื้นฐาน
                     </a>
                 @endcan
-                <a href="{{ route('booking.return.list') }}" class="btn-outline px-4 py-2">📊 ตรวจสอบการคืน</a>                    
             </div>
 
             <!-- 🔹 โปรไฟล์ -->
@@ -178,10 +177,10 @@
                 <x-responsive-nav-link :href="route('manage.bookings.history.index')" :active="request()->routeIs('manage.bookings.history.*')">
                     📜 ประวัติการจองทั้งหมด
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="#">
+                <x-responsive-nav-link :href="route('booking.return.list')">
                     📊 ตรวจสอบการคืน
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="#">
+                <x-responsive-nav-link :href="route('manage.fines.index')">
                     💰 การคิดค่าปรับ
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('manage.masterdata.index')" :active="request()->routeIs('manage.masterdata.*')">

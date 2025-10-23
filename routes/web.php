@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ManageBookingController;
 use App\Http\Controllers\Admin\MasterDataController;
+use App\Http\Controllers\ManageFineController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,7 +50,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/booking/return/{id}', [BookingController::class, 'markAsReturned'])
         ->name('booking.return');
 
-    // ✅ เพิ่มใหม่ — รายการอุปกรณ์ที่ฉันรับแล้ว (หน้า my-pickups.blade.php)
+    // ✅ รายการอุปกรณ์ที่ฉันรับแล้ว
     Route::get('/pickups/mine', [BookingController::class, 'myPickups'])
         ->name('pickups.mine');
 
@@ -87,6 +88,12 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
 
         // 📜 ประวัติการจองทั้งหมด
         Route::get('history', [ManageBookingController::class, 'historyIndex'])->name('history.index');
+    });
+
+    // 💰 การจัดการค่าปรับ
+    Route::prefix('manage/fines')->name('manage.fines.')->group(function () {
+        Route::get('/', [ManageFineController::class, 'index'])->name('index');
+        Route::post('/{fine}/mark-paid', [ManageFineController::class, 'markPaid'])->name('markPaid');
     });
 
     // 🧑‍💼 แดชบอร์ดแอดมิน
