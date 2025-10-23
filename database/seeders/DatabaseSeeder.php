@@ -8,12 +8,9 @@ use App\Models\Equipment;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // 🔹 สร้างบัญชีผู้ดูแลระบบ (Admin)
+        // 🧑‍💻 สร้างผู้ดูแลระบบ
         User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
@@ -21,7 +18,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        // 🔹 สร้างบัญชีผู้ใช้ทดสอบ
+        // 👤 ผู้ใช้ทั่วไป
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -29,13 +26,35 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        // 🔹 เพิ่มข้อมูลอุปกรณ์เริ่มต้นที่สามารถจองได้
+        // 📦 อุปกรณ์เริ่มต้น
         Equipment::insert([
-            ['name' => 'โปรเจคเตอร์ Epson X300', 'type' => 'อุปกรณ์ภาพ', 'is_available' => true],
-            ['name' => 'ไมค์ไร้สาย Shure', 'type' => 'อุปกรณ์เสียง', 'is_available' => true],
-            ['name' => 'กล้อง DSLR Canon', 'type' => 'กล้อง', 'is_available' => true],
-            ['name' => 'ขาตั้งกล้อง', 'type' => 'อุปกรณ์เสริม', 'is_available' => true],
-            ['name' => 'โน้ตบุ๊ก Asus', 'type' => 'คอมพิวเตอร์', 'is_available' => true],
+            [
+                'name' => 'กีฬา',
+                'type' => 'กีฬา',
+                'description' => 'อุปกรณ์สำหรับเล่นกีฬา',
+                'available' => 5,
+                'total' => 5,
+                'image' => 'bool.jpg',
+                'is_available' => true,
+            ],
+            [
+                'name' => 'ห้องประชุม',
+                'type' => 'ห้อง',
+                'description' => 'ห้องขนาดกลางสำหรับการประชุม',
+                'available' => 2,
+                'total' => 2,
+                'image' => 'room.jpg',
+                'is_available' => true,
+            ],
+            [
+                'name' => 'เครื่องครัว',
+                'type' => 'เครื่องครัว',
+                'description' => 'สำหรับกิจกรรมในห้องอาหาร',
+                'available' => 4,
+                'total' => 4,
+                'image' => 'k.jpg',
+                'is_available' => true,
+            ],
         ]);
     }
 }

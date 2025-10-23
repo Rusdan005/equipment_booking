@@ -14,21 +14,36 @@ use App\Http\Controllers\Admin\MasterDataController;
 */
 Route::get('/', fn() => view('welcome'))->name('home');
 
-/*
-|--------------------------------------------------------------------------
-| Booking Routes (User)
-|--------------------------------------------------------------------------
-*/
+// 🏠 หน้าแรก
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+// 📋 หน้ารายการอุปกรณ์ (ทุกคนดูได้)
+Route::get('/equipment', [BookingController::class, 'equipmentList'])->name('equipment.index');
+
+// 📅 ระบบจองอุปกรณ์ (เฉพาะผู้ล็อกอิน)
 Route::middleware(['auth'])->group(function () {
 
-    // 🎒 รายการอุปกรณ์ & การจอง
-    Route::get('/equipment', [BookingController::class, 'equipmentList'])->name('equipment.index');
+    // ✅ แสดงรายการอุปกรณ์ที่ว่างให้จอง
     Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
+
+    // ✅ ฟอร์มจองอุปกรณ์
     Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
+
+    // ✅ บันทึกข้อมูลการจอง
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
 
-    // 📅 หน้ากำหนดรับอุปกรณ์ของฉัน
-    Route::get('/my/pickups', [BookingController::class, 'myPickups'])->name('pickups.mine');
+    // ✅ ตรวจสอบการคืนอุปกรณ์
+    Route::get('/booking/return', [BookingController::class, 'returnList'])->name('booking.return.list');
+
+    // ✅ ทำเครื่องหมายว่า "คืนแล้ว"
+    Route::put('/booking/return/{id}', [BookingController::class, 'markAsReturned'])->name('booking.return');
+
+    // 👤 โปรไฟล์ผู้ใช้
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 /*
@@ -62,19 +77,10 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Profile & Auth Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+// 📊 หน้า Dashboard หลังล็อกอิน
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/dashboard', fn() => view('dashboard'))
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
+// 🔐 ระบบ Auth (Login / Register / Forgot Password)
 require __DIR__ . '/auth.php';

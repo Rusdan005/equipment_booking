@@ -12,31 +12,25 @@ class BookingController extends Controller
     // 🔸 หน้าแสดงรายการอุปกรณ์ทั้งหมด
     public function index()
     {
-        // ดึงเฉพาะอุปกรณ์ที่ยังว่าง
         $equipments = Equipment::where('is_available', true)->get();
         return view('booking.index', compact('equipments'));
     }
 
-    // 🔸 หน้าแบบฟอร์มจองอุปกรณ์ (แก้รวมให้ถูก)
+    // 🔸 หน้าแบบฟอร์มจองอุปกรณ์
     public function create()
     {
-        // ดึงข้อมูลอุปกรณ์ทั้งหมด (หรือเฉพาะที่ยังว่าง)
         $equipments = Equipment::where('is_available', true)->get();
-
-        // ส่งไปยังหน้า booking.create
         return view('booking.create', compact('equipments'));
     }
 
-    // 🔸 บันทึกข้อมูลการจอง
+    // 🔸 ฟังก์ชันบันทึกข้อมูลการจอง
     public function store(Request $request)
     {
         $request->validate([
             'equipment_id' => 'required|exists:equipments,id',
             'borrow_date' => 'required|date|after_or_equal:today',
             'return_date' => 'required|date|after:borrow_date',
-            'usage_type' => 'required|string',
-            'location' => 'required|string',
-            'purpose' => 'required|string',
+            'purpose' => 'required|string|max:255',
         ]);
 
         Booking::create([
@@ -44,13 +38,36 @@ class BookingController extends Controller
             'equipment_id' => $request->equipment_id,
             'borrow_date' => $request->borrow_date,
             'return_date' => $request->return_date,
-            'usage_type' => $request->usage_type,
-            'location' => $request->location,
             'purpose' => $request->purpose,
             'status' => 'pending',
         ]);
 
-        return redirect()->route('booking.index')->with('success', 'ทำการจองเรียบร้อยแล้ว!');
+        Equipment::where('id', $request->equipment_id)->update(['is_available' => false]);
+
+        return redirect()->route('booking.index')->with('success', '🎉 ทำการจองเรียบร้อยแล้ว!');
+    }
+
+    // 🟢 แสดงหน้าตรวจสอบการคืนอุปกรณ์
+    public function returnList()
+    {
+        $bookings = Booking::with(['user', 'equipment'])
+            ->orderBy('borrow_date', 'desc')
+            ->get();
+
+        return view('booking.return', compact('bookings'));
+    }
+
+    // 🟢 อัปเดตสถานะเมื่อคืนอุปกรณ์แล้ว
+    public function markAsReturned($id)
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->status = 'returned';
+        $booking->save();
+
+        // ✅ ปล่อยให้อุปกรณ์กลับมา “ว่าง” อีกครั้ง
+        $booking->equipment->update(['is_available' => true]);
+
+        return back()->with('success', '✅ อุปกรณ์ถูกทำเครื่องหมายว่าคืนแล้ว!');
     }
 
     // 📅 🆕 หน้ากำหนดรับอุปกรณ์ของฉัน (User เห็นเอง)
