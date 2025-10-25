@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Equipment;
 use App\Models\Booking;
+use App\Models\Fine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,13 +45,13 @@ class BookingController extends Controller
             'status' => 'pending',
         ]);
 
-        // ✅ เมื่อจองแล้วให้อุปกรณ์เป็น “ไม่ว่าง”
         Equipment::where('id', $request->equipment_id)->update(['is_available' => false]);
 
-        return redirect()->route('booking.index')->with('success', '🎉 ทำการจองเรียบร้อยแล้ว!');
+        return redirect()->route('booking.index')
+            ->with('success', '🎉 ทำการจองเรียบร้อยแล้ว! กรุณารอการอนุมัติ');
     }
 
-    // 🟢 แสดงหน้าตรวจสอบการคืนอุปกรณ์
+    // 🟢 แสดงหน้าตรวจสอบการคืนอุปกรณ์ (สำหรับ Staff/Admin)
     public function returnList()
     {
         $bookings = Booking::with(['user', 'equipment'])
@@ -60,29 +61,60 @@ class BookingController extends Controller
         return view('booking.return', compact('bookings'));
     }
 
-    // 🟢 อัปเดตสถานะเมื่อ “คืนอุปกรณ์แล้ว”
-    public function markAsReturned($id)
+    // ✅ ฟังก์ชันคืนอุปกรณ์ + บันทึกรูป + คิดค่าปรับ
+    public function markAsReturned(Request $request, $id)
     {
-        $booking = Booking::findOrFail($id);
-        $booking->status = 'returned';
+        $booking = Booking::with('equipment')->findOrFail($id);
+        $today = now();
+
+        // ✅ ตรวจสอบและบันทึกรูปตอนคืน
+        $photoPath = null;
+        if ($request->hasFile('return_photo')) {
+            $request->validate([
+                'return_photo' => 'image|mimes:jpeg,png,jpg|max:5120', // สูงสุด 5MB
+            ]);
+
+            $photoPath = $request->file('return_photo')->store('returns', 'public');
+        }
+
+        // 🔍 ตรวจว่าคืนช้าหรือไม่
+        if ($today->gt($booking->return_date)) {
+            $daysLate = $today->diffInDays($booking->return_date);
+            $fineAmount = $daysLate * 50; // 💰 คิด 50 บาท/วัน
+
+            // ✅ บันทึกค่าปรับ
+            Fine::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'amount' => $fineAmount,
+                'reason' => "คืนช้า {$daysLate} วัน",
+                'status' => 'pending',
+            ]);
+
+            $booking->status = 'overdue';
+        } else {
+            $booking->status = 'returned';
+        }
+
+        $booking->returned_at = $today;
+        $booking->return_photo = $photoPath; // 🧾 บันทึกรูปหลักฐาน
         $booking->save();
 
         // ✅ ปล่อยอุปกรณ์ให้ว่างอีกครั้ง
         $booking->equipment->update(['is_available' => true]);
 
-        return back()->with('success', '✅ อุปกรณ์ถูกทำเครื่องหมายว่าคืนแล้ว!');
+        return back()->with('success', '✅ คืนอุปกรณ์และบันทึกรูปเรียบร้อยแล้ว!');
     }
 
-    // 📦 แสดงหน้ารายการอุปกรณ์ที่ฉันรับแล้ว (ตรงกับ my-pickups.blade.php)
+    // 📦 แสดงหน้ารายการอุปกรณ์ของฉัน
     public function myPickups()
     {
         $bookings = Booking::with('equipment')
             ->where('user_id', Auth::id())
-            ->whereIn('status', ['approved', 'picked_up']) // แสดงเฉพาะที่อนุมัติแล้วหรือรับไปแล้ว
+            ->whereIn('status', ['pending', 'approved', 'picked_up', 'returned', 'overdue'])
             ->orderBy('borrow_date', 'asc')
             ->get();
 
-        // ✅ ส่งไปยัง resources/views/booking/my-pickups.blade.php
         return view('booking.my-pickups', compact('bookings'));
     }
 }

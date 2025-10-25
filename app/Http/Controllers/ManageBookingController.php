@@ -8,25 +8,17 @@ use Illuminate\Support\Facades\Auth;
 
 class ManageBookingController extends Controller
 {
-    /**
-     * ✅ บังคับให้ต้องล็อกอินก่อนทุกฟังก์ชัน
-     */
     public function __construct()
     {
         $this->middleware(['auth']);
     }
 
     // ----------------------------------------------------------------------
-    // 📝 ส่วนที่ 1 : พิจารณาการจอง (Review)
+    // 📝 พิจารณาการจอง (Review)
     // ----------------------------------------------------------------------
-
-    /**
-     * แสดงรายการคำขอที่รอพิจารณา (status = pending)
-     */
     public function reviewIndex()
     {
-        $this->authorize('manage-bookings'); // ตรวจสิทธิ์เฉพาะ admin/staff
-
+        $this->authorize('manage-bookings');
         $bookings = Booking::with(['user', 'equipment'])
             ->where('status', 'pending')
             ->latest()
@@ -35,19 +27,14 @@ class ManageBookingController extends Controller
         return view('manage.bookings.review.index', compact('bookings'));
     }
 
-    /**
-     * แสดงรายละเอียดคำขอแต่ละรายการ
-     */
     public function reviewShow(Booking $booking)
     {
         $this->authorize('manage-bookings');
         $booking->load(['user', 'equipment']);
+
         return view('manage.bookings.review.show', compact('booking'));
     }
 
-    /**
-     * ✅ อนุมัติคำขอ
-     */
     public function approve(Booking $booking)
     {
         $this->authorize('manage-bookings');
@@ -67,16 +54,11 @@ class ManageBookingController extends Controller
             ->with('success', '✅ อนุมัติคำขอเรียบร้อยแล้ว');
     }
 
-    /**
-     * ❌ ปฏิเสธคำขอ
-     */
     public function reject(Booking $booking, Request $request)
     {
         $this->authorize('manage-bookings');
 
-        $request->validate([
-            'reject_reason' => 'required|string|min:3'
-        ]);
+        $request->validate(['reject_reason' => 'required|string|min:3']);
 
         if ($booking->status !== 'pending') {
             return back()->with('error', 'คำขอนี้ถูกพิจารณาไปแล้ว');
@@ -94,12 +76,8 @@ class ManageBookingController extends Controller
     }
 
     // ----------------------------------------------------------------------
-    // 📦 ส่วนที่ 2 : มารับอุปกรณ์ (Pickup)
+    // 📦 มารับอุปกรณ์ (Pickup)
     // ----------------------------------------------------------------------
-
-    /**
-     * แสดงรายการที่อนุมัติแล้ว แต่ยังไม่มารับ
-     */
     public function pickupIndex(Request $request)
     {
         $this->authorize('manage-bookings');
@@ -114,13 +92,9 @@ class ManageBookingController extends Controller
         }
 
         $bookings = $query->paginate(10);
-
         return view('manage.bookings.pickup.index', compact('bookings'));
     }
 
-    /**
-     * ✅ ทำเครื่องหมายว่ารับอุปกรณ์แล้ว
-     */
     public function pickup(Booking $booking)
     {
         $this->authorize('manage-bookings');
@@ -140,7 +114,7 @@ class ManageBookingController extends Controller
     }
 
     // ----------------------------------------------------------------------
-    // 📜 ส่วนที่ 3 : ประวัติการจองทั้งหมด (History)
+    // 📜 ประวัติการจองทั้งหมด (History)
     // ----------------------------------------------------------------------
     public function historyIndex(Request $request)
     {
@@ -148,12 +122,10 @@ class ManageBookingController extends Controller
 
         $query = Booking::with(['user', 'equipment'])->latest();
 
-        // ✅ กรองสถานะ (ถ้ามี)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // ✅ ค้นหาชื่อผู้ใช้หรือชื่ออุปกรณ์
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->whereHas('user', function ($u) use ($request) {
@@ -165,21 +137,37 @@ class ManageBookingController extends Controller
         }
 
         $bookings = $query->paginate(10);
+
         return view('manage.bookings.history.index', compact('bookings'));
     }
 
     // ----------------------------------------------------------------------
-    // 📊 ส่วนที่ 4 : ตรวจสอบการคืนอุปกรณ์ (Returns)
+    // 📊 ตรวจสอบการคืนอุปกรณ์ (Returns)
     // ----------------------------------------------------------------------
     public function returnsIndex()
     {
         $this->authorize('manage-bookings');
 
         $bookings = Booking::with(['user', 'equipment'])
-            ->whereIn('status', ['returned', 'overdue'])
-            ->orderByDesc('returned_at')
+            ->whereIn('status', ['returned', 'overdue', 'picked_up'])
+            ->orderByDesc('borrow_date')
             ->paginate(10);
 
         return view('manage.bookings.returns.index', compact('bookings'));
+    }
+
+    // ✅ ฟังก์ชันให้แอดมินทำเครื่องหมายว่าคืนแล้ว
+    public function markAsReturnedByAdmin($id)
+    {
+        $booking = Booking::with('equipment')->findOrFail($id);
+
+        $booking->update([
+            'status' => 'returned',
+            'returned_at' => now(),
+        ]);
+
+        $booking->equipment->update(['is_available' => true]);
+
+        return back()->with('success', '✅ บันทึกการคืนอุปกรณ์เรียบร้อยแล้ว!');
     }
 }

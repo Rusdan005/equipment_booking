@@ -10,11 +10,25 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+
+            // 🔗 ความสัมพันธ์
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('equipment_id')->constrained('equipments')->onDelete('cascade');
-            $table->date('borrow_date');
-            $table->date('return_date');
+
+            // 📅 วันยืมและวันคืน (อนุญาตให้ null เผื่อบางขั้นตอน)
+            $table->date('borrow_date')->nullable();
+            $table->date('return_date')->nullable();
+
+            // 🧾 รายละเอียดเพิ่มเติม
+            $table->string('purpose')->nullable();   // วัตถุประสงค์
+            $table->string('location')->nullable();  // สถานที่ใช้งาน
+
+            // 📦 สถานะการจอง
             $table->string('status')->default('pending');
+
+            // 📆 วันที่คืนจริง
+            $table->timestamp('returned_at')->nullable();
+
             $table->timestamps();
         });
     }

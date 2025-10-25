@@ -44,7 +44,7 @@
                 <select id="filterType"
                         class="rounded-lg border border-gray-300 px-4 py-3 text-gray-700 focus:ring-2 focus:ring-pink-400">
                     <option value="">ทุกประเภท</option>
-                   <option value="กีฬา">กีฬา</option>
+                    <option value="กีฬา">กีฬา</option>
                     <option value="ห้อง">ห้อง</option>
                     <option value="เครื่องครัว">เครื่องครัว</option>
                 </select>
@@ -54,7 +54,6 @@
             <div id="equipmentList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 @foreach($equipments as $item)
                     @php
-                        // 🖼️ กำหนดภาพพื้นฐานอัตโนมัติจากประเภท
                         $imageMap = [
                             'กีฬา' => 'bool.jpg',
                             'ห้อง' => 'room.jpg',
@@ -65,7 +64,6 @@
 
                     <div class="bg-white rounded-2xl shadow-lg border hover:shadow-2xl transition overflow-hidden">
                         <div class="relative">
-                            {{-- ✅ แสดงภาพจาก public/images --}}
                             <img src="{{ $item->image ? asset('images/' . $item->image) : asset('images/' . $imageFile) }}"
                                 alt="{{ $item->name }}"
                                 class="w-full h-48 object-cover rounded-t-2xl">
@@ -130,6 +128,17 @@
                         <label class="text-sm font-semibold">เบอร์โทรศัพท์</label>
                         <input type="text" name="phone" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
                     </div>
+
+                    {{-- 🔸 เพิ่ม สาขา + คณะ --}}
+                    <div>
+                        <label class="text-sm font-semibold">สาขา</label>
+                        <input type="text" name="major" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold">คณะ</label>
+                        <input type="text" name="faculty" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
+                    </div>
+
                     <div>
                         <label class="text-sm font-semibold">จำนวนที่ต้องการ</label>
                         <input type="number" name="quantity" min="1" value="1" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
@@ -141,6 +150,16 @@
                     <div>
                         <label class="text-sm font-semibold">วันที่คืน</label>
                         <input type="date" name="return_date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
+                    </div>
+
+                    {{-- 🔸 เพิ่มเวลามารับ และเวลาส่งคืน --}}
+                    <div>
+                        <label class="text-sm font-semibold">เวลามารับ</label>
+                        <input type="time" name="pickup_time" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold">เวลาส่งคืน</label>
+                        <input type="time" name="return_time" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
                     </div>
                 </div>
 

@@ -42,17 +42,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/booking/store', [BookingController::class, 'store'])
         ->name('booking.store');
 
-    // ✅ ตรวจสอบการคืนอุปกรณ์
+    // ✅ ตรวจสอบการคืนอุปกรณ์ (ฝั่งผู้ใช้)
     Route::get('/booking/return', [BookingController::class, 'returnList'])
         ->name('booking.return.list');
 
-    // ✅ ทำเครื่องหมายว่า "คืนแล้ว"
+    // ✅ ทำเครื่องหมายว่า "คืนแล้ว" (ผู้ใช้)
     Route::put('/booking/return/{id}', [BookingController::class, 'markAsReturned'])
         ->name('booking.return');
-
-    // ✅ รายการอุปกรณ์ที่ฉันรับแล้ว
-    Route::get('/pickups/mine', [BookingController::class, 'myPickups'])
-        ->name('pickups.mine');
 
     // 👤 โปรไฟล์ผู้ใช้
     Route::get('/profile', [ProfileController::class, 'edit'])
@@ -61,6 +57,17 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| 🎯 Routes สำหรับผู้ใช้ทั่วไป (User)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:user'])->group(function () {
+    // ✅ หน้า “กำหนดรับอุปกรณ์ของฉัน” + คืนอุปกรณ์ (พร้อมอัปโหลดรูป)
+    Route::get('/pickups/mine', [BookingController::class, 'myPickups'])
+        ->name('pickups.mine');
 });
 
 /*
@@ -74,8 +81,9 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     Route::get('/manage/masterdata', [MasterDataController::class, 'index'])
         ->name('manage.masterdata.index');
 
-    // 📝 พิจารณาการจอง / 📦 มารับอุปกรณ์ / 📜 ประวัติทั้งหมด
+    // 📝 การจัดการการจอง
     Route::prefix('manage/bookings')->name('manage.bookings.')->group(function () {
+
         // 🟠 พิจารณาการจอง
         Route::get('review', [ManageBookingController::class, 'reviewIndex'])->name('review.index');
         Route::get('review/{booking}', [ManageBookingController::class, 'reviewShow'])->name('review.show');
@@ -88,6 +96,10 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
 
         // 📜 ประวัติการจองทั้งหมด
         Route::get('history', [ManageBookingController::class, 'historyIndex'])->name('history.index');
+
+        // 📊 ตรวจสอบและยืนยันการคืนอุปกรณ์ (Admin)
+        Route::get('returns', [ManageBookingController::class, 'returnsIndex'])->name('returns.index');
+        Route::put('returns/{id}', [ManageBookingController::class, 'markAsReturnedByAdmin'])->name('returns.mark');
     });
 
     // 💰 การจัดการค่าปรับ
@@ -95,6 +107,10 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
         Route::get('/', [ManageFineController::class, 'index'])->name('index');
         Route::post('/{fine}/mark-paid', [ManageFineController::class, 'markPaid'])->name('markPaid');
     });
+
+    // 🧾 หน้าใหม่: ดูรูปตอนคืน + รายละเอียดการคืนทั้งหมด
+    Route::get('/manage/returns/photos', [ManageBookingController::class, 'viewReturnPhotos'])
+        ->name('manage.returns.photos');
 
     // 🧑‍💼 แดชบอร์ดแอดมิน
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])

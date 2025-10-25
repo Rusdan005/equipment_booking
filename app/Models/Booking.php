@@ -4,20 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class Booking extends Model
 {
     use HasFactory;
 
     /**
-     * 🧩 กำหนดคอลัมน์ที่สามารถบันทึกได้ (fillable)
+     * 🧩 คอลัมน์ที่อนุญาตให้บันทึกข้อมูลได้
      */
     protected $fillable = [
         'user_id',
         'equipment_id',
-        'start_at',
-        'end_at',
+        'borrow_date',
+        'return_date',
+        'purpose',
+        'location',
         'status',
         'approved_by',
         'approved_at',
@@ -25,16 +26,18 @@ class Booking extends Model
         'picked_up_at',
         'picked_up_by',
         'pickup_code',
+        'returned_at',
     ];
 
     /**
-     * 🕒 ระบุว่า column ไหนคือวันที่/เวลา
+     * 🕒 ระบุฟิลด์ที่เป็นวันที่ (date type)
      */
     protected $dates = [
-        'start_at',
-        'end_at',
+        'borrow_date',
+        'return_date',
         'approved_at',
         'picked_up_at',
+        'returned_at',
     ];
 
     /**
@@ -61,25 +64,6 @@ class Booking extends Model
     }
 
     /**
-     * 🔍 Scopes: ฟังก์ชันช่วยกรองข้อมูล
-     */
-    public function scopePending(Builder $query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    public function scopeApproved(Builder $query)
-    {
-        return $query->where('status', 'approved');
-    }
-
-    public function scopeReadyForPickup(Builder $query)
-    {
-        return $query->where('status', 'approved')
-                     ->whereNull('picked_up_at');
-    }
-
-    /**
      * 🎨 ฟังก์ชันช่วยตกแต่ง badge สีสถานะ
      */
     public function getStatusBadgeClassAttribute(): string
@@ -89,6 +73,8 @@ class Booking extends Model
             'approved' => 'bg-green-100 text-green-800',
             'rejected' => 'bg-red-100 text-red-800',
             'picked_up'=> 'bg-blue-100 text-blue-800',
+            'returned' => 'bg-green-200 text-green-900',
+            'overdue'  => 'bg-red-200 text-red-900',
             default    => 'bg-gray-100 text-gray-800',
         };
     }

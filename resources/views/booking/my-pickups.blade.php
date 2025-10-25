@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-2xl text-[#FF69B4] leading-tight flex items-center gap-2">
-            📅 กำหนดรับอุปกรณ์ของฉัน
+            📅 กำหนดรับ / คืนอุปกรณ์ของฉัน
         </h2>
     </x-slot>
 
@@ -23,28 +23,21 @@
             font-size: 0.8rem;
             font-weight: 600;
         }
-        .badge-pending {
-            background-color: #fff7cc;
-            color: #946200;
-        }
-        .badge-approved {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        .badge-rejected {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
+        .badge-pending { background-color: #fff7cc; color: #946200; }
+        .badge-approved { background-color: #d1fae5; color: #065f46; }
+        .badge-picked { background-color: #e0f2fe; color: #0369a1; }
+        .badge-returned { background-color: #e6ffe9; color: #15803d; }
+        .badge-overdue { background-color: #fee2e2; color: #b91c1c; }
     </style>
 
     <div class="py-8 bg-gradient-to-b from-pink-50 via-white to-pink-100 min-h-screen">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
-            
+
             {{-- 🔸 ถ้าไม่มีข้อมูล --}}
             @if($bookings->isEmpty())
                 <div class="bg-white border border-pink-200 rounded-2xl p-10 text-center shadow-sm">
                     <p class="text-gray-500 text-lg">
-                        🚫 ขณะนี้ยังไม่มีรายการที่รอรับอุปกรณ์
+                        🚫 ขณะนี้ยังไม่มีรายการจองหรือรายการคืนอุปกรณ์ของคุณ
                     </p>
                 </div>
             @else
@@ -54,7 +47,7 @@
                         <div class="card p-6">
                             <div class="flex flex-col md:flex-row justify-between gap-4">
                                 
-                                {{-- ฝั่งซ้าย: รายละเอียดอุปกรณ์ --}}
+                                {{-- 📦 รายละเอียดอุปกรณ์ --}}
                                 <div>
                                     <h3 class="text-xl font-bold text-[#FF69B4]">
                                         🎒 {{ optional($b->equipment)->name ?? 'อุปกรณ์ไม่ระบุ' }}
@@ -70,7 +63,7 @@
                                     </p>
                                 </div>
 
-                                {{-- ฝั่งขวา: วันที่และสถานะ --}}
+                                {{-- 🕓 วันที่และสถานะ --}}
                                 <div class="text-right">
                                     <p class="text-gray-500 text-sm">📆 วันนัดรับ:</p>
                                     <p class="text-lg font-semibold text-[#FF69B4]">
@@ -83,10 +76,12 @@
                                     </p>
 
                                     <div class="mt-3">
-                                        <span class="badge 
+                                        <span class="badge
                                             @if($b->status === 'approved') badge-approved
                                             @elseif($b->status === 'pending') badge-pending
-                                            @elseif($b->status === 'rejected') badge-rejected
+                                            @elseif($b->status === 'picked_up') badge-picked
+                                            @elseif($b->status === 'returned') badge-returned
+                                            @elseif($b->status === 'overdue') badge-overdue
                                             @else bg-gray-200 text-gray-600 @endif">
                                             {{ strtoupper($b->status) }}
                                         </span>
@@ -100,6 +95,39 @@
                                     <span class="text-xl">🔑</span>
                                     <span>โค้ดรับอุปกรณ์ของคุณคือ:</span>
                                     <span class="font-mono font-bold text-[#FF69B4]">{{ $b->pickup_code }}</span>
+                                </div>
+                            @endif
+
+                            {{-- 🧾 ส่วนเพิ่ม: ฟอร์มคืนอุปกรณ์ --}}
+                            @if(in_array($b->status, ['picked_up', 'overdue']))
+                                <div class="mt-6 border-t border-pink-100 pt-5">
+                                    <form action="{{ route('booking.return', $b->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                                        @csrf
+                                        @method('PUT')
+
+                                        <label class="block text-sm font-medium text-gray-600">
+                                            📸 อัปโหลดรูปภาพตอนคืนอุปกรณ์:
+                                        </label>
+                                        <input type="file" name="return_photo" accept="image/*" capture="camera"
+                                            class="border border-pink-200 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                                            required>
+
+                                        <button type="submit"
+                                            class="bg-[#FF69B4] hover:bg-[#ff4f9c] text-white px-4 py-2 rounded-full font-medium shadow transition duration-200">
+                                            ✅ ยืนยันการคืนอุปกรณ์
+                                        </button>
+                                    </form>
+                                </div>
+                            @elseif($b->status === 'returned')
+                                <div class="mt-5 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3">
+                                    ✅ คืนอุปกรณ์เรียบร้อยแล้ว
+                                    @if($b->return_photo)
+                                        <div class="mt-3">
+                                            <img src="{{ asset('storage/' . $b->return_photo) }}"
+                                                 alt="หลักฐานการคืน"
+                                                 class="rounded-lg border border-gray-200 shadow w-64">
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
                         </div>

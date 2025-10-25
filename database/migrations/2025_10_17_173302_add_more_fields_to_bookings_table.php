@@ -12,9 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('usage_type')->nullable()->after('return_date');
-            $table->string('location')->nullable()->after('usage_type');
-            $table->text('purpose')->nullable()->after('location');
+            if (!Schema::hasColumn('bookings', 'usage_type')) {
+                $table->string('usage_type')->nullable()->after('return_date');
+            }
+
+            if (!Schema::hasColumn('bookings', 'location')) {
+                $table->string('location')->nullable()->after('usage_type');
+            }
+
+            if (!Schema::hasColumn('bookings', 'purpose')) {
+                $table->text('purpose')->nullable()->after('location');
+            }
         });
     }
 
@@ -24,7 +32,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->dropColumn(['usage_type', 'location', 'purpose']);
+            if (Schema::hasColumn('bookings', 'usage_type')) {
+                $table->dropColumn('usage_type');
+            }
+            if (Schema::hasColumn('bookings', 'location')) {
+                $table->dropColumn('location');
+            }
+            if (Schema::hasColumn('bookings', 'purpose')) {
+                $table->dropColumn('purpose');
+            }
         });
     }
 };

@@ -59,6 +59,8 @@
                                             @if($item->is_available)
                                                 <form action="{{ route('booking.store') }}" method="POST" class="flex flex-col sm:flex-row items-center justify-center gap-2">
                                                     @csrf
+                                                    <input type="hidden" name="equipment_id" value="{{ $item->id }}">
+                                                    
                                                     <div class="flex flex-col sm:flex-row gap-2">
                                                         <input type="date" name="borrow_date"
                                                             class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none"
@@ -67,9 +69,18 @@
                                                             class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none"
                                                             required>
                                                     </div>
-                                                    <input type="hidden" name="equipment_id" value="{{ $item->id }}">
+
+                                                    <input type="text" name="purpose"
+                                                        placeholder="วัตถุประสงค์"
+                                                        class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none mt-2 sm:mt-0"
+                                                        required>
+
+                                                    <input type="text" name="location"
+                                                        placeholder="สถานที่ใช้งาน (ถ้ามี)"
+                                                        class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none mt-2 sm:mt-0">
+
                                                     <button type="submit"
-                                                        class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-full shadow-md transition duration-200 text-sm font-medium">
+                                                        class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-full shadow-md transition duration-200 text-sm font-medium mt-2 sm:mt-0">
                                                         จองใช้งาน
                                                     </button>
                                                 </form>
@@ -83,7 +94,6 @@
                         </table>
                     </div>
                 @endif
-
             </div>
         </div>
     </div>
