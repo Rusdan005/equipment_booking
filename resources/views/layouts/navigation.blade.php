@@ -80,9 +80,7 @@
                     <a href="{{ route('manage.bookings.review.index') }}" class="btn-outline px-4 py-2">
                         📝 พิจารณาการจอง
                     </a>
-                    <a href="{{ route('manage.bookings.pickup.index') }}" class="btn-outline px-4 py-2">
-                        📦 มารับอุปกรณ์
-                    </a>
+                    {{-- 📦 ลบ “มารับอุปกรณ์” ออกแล้ว --}}
                     <a href="{{ route('manage.bookings.history.index') }}" class="btn-outline px-4 py-2">
                         📜 ประวัติการจองทั้งหมด
                     </a>
@@ -171,9 +169,7 @@
                 <x-responsive-nav-link :href="route('manage.bookings.review.index')" :active="request()->routeIs('manage.bookings.review.*')">
                     📝 พิจารณาการจอง
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('manage.bookings.pickup.index')" :active="request()->routeIs('manage.bookings.pickup.*')">
-                    📦 มารับอุปกรณ์
-                </x-responsive-nav-link>
+                {{-- 📦 ลบ “มารับอุปกรณ์” ออกแล้ว --}}
                 <x-responsive-nav-link :href="route('manage.bookings.history.index')" :active="request()->routeIs('manage.bookings.history.*')">
                     📜 ประวัติการจองทั้งหมด
                 </x-responsive-nav-link>
