@@ -39,34 +39,65 @@
      class="w-80 mt-10 lg:mt-0 drop-shadow">
   </section>
 
-  <section class="bg-white py-14 shadow-inner">
-    <h3 class="text-center text-3xl font-semibold text-pink-700 mb-10">ทีมผู้พัฒนา</h3>
-    <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-      <div class="bg-pink-100 rounded-2xl p-6 text-center hover:shadow-lg">
-        <img class="w-20 mx-auto mb-3" src="https://cdn-icons-png.flaticon.com/512/2922/2922506.png">
-        <h4 class="text-xl font-bold text-pink-700">ซัน</h4>
-        <p class="text-gray-600">หัวหน้าโปรเจกต์ / Backend Lead</p>
-      </div>
-      <div class="bg-pink-100 rounded-2xl p-6 text-center hover:shadow-lg">
-        <img class="w-20 mx-auto mb-3" src="https://cdn-icons-png.flaticon.com/512/2922/2922565.png">
-        <h4 class="text-xl font-bold text-pink-700">รุสดี</h4>
-        <p class="text-gray-600">Frontend / UI Designer</p>
-      </div>
-      <div class="bg-pink-100 rounded-2xl p-6 text-center hover:shadow-lg">
-        <img class="w-20 mx-auto mb-3" src="https://cdn-icons-png.flaticon.com/512/2922/2922561.png">
-        <h4 class="text-xl font-bold text-pink-700">อามีน</h4>
-        <p class="text-gray-600">Booking & Borrow Dev</p>
-      </div>
-      <div class="bg-pink-100 rounded-2xl p-6 text-center hover:shadow-lg">
-        <img class="w-20 mx-auto mb-3" src="https://cdn-icons-png.flaticon.com/512/2922/2922510.png">
-        <h4 class="text-xl font-bold text-pink-700">การิม</h4>
-        <p class="text-gray-600">Reports & Integration</p>
-      </div>
-    </div>
-  </section>
+  {{-- 🌸 Section ใหม่: ขั้นตอนการทำงานของระบบ --}}
+  <section class="relative py-20 bg-gradient-to-b from-white to-pink-50 overflow-hidden">
+    {{-- วงกลมเบลอด้านหลัง --}}
+    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-[600px] h-[600px] bg-pink-200/20 rounded-full blur-3xl"></div>
 
+    <div class="relative max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-3xl font-bold text-[#FF69B4] mb-4">🚀 ระบบการจองและยืมอุปกรณ์คืออะไร?</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto mb-12">
+        ระบบขององค์การบริหารนักศึกษาถูกออกแบบเพื่อช่วยให้นักศึกษาสามารถจัดการอุปกรณ์ได้ง่าย  
+        ตั้งแต่ขั้นตอน “จอง” “ยืม” และ “คืน” พร้อมระบบติดตามแบบเรียลไทม์
+      </p>
+
+      {{-- 🔹 3 ขั้นตอนหลัก --}}
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        {{-- ขั้นตอน 1 --}}
+        <div class="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition relative overflow-hidden">
+          <div class="absolute -top-10 -right-10 w-32 h-32 bg-pink-100 rounded-full blur-xl group-hover:bg-pink-200 transition"></div>
+          <div class="relative z-10">
+            <div class="bg-pink-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">📝</div>
+            <h3 class="text-xl font-bold text-pink-700 mb-2">ขั้นตอนที่ 1: จองอุปกรณ์</h3>
+            <p class="text-gray-600">
+              เลือกอุปกรณ์ที่ต้องการผ่านหน้าเว็บได้ทันที  
+              ระบบจะบันทึกข้อมูลและแจ้งเตือนเมื่ออนุมัติการจอง
+            </p>
+          </div>
+        </div>
+
+        {{-- ขั้นตอน 2 --}}
+        <div class="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition relative overflow-hidden">
+          <div class="absolute -top-10 -right-10 w-32 h-32 bg-pink-100 rounded-full blur-xl group-hover:bg-pink-200 transition"></div>
+          <div class="relative z-10">
+            <div class="bg-pink-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">🎒</div>
+            <h3 class="text-xl font-bold text-pink-700 mb-2">ขั้นตอนที่ 2: ยืมอุปกรณ์</h3>
+            <p class="text-gray-600">
+              หลังจากจองสำเร็จ สามารถมายืมอุปกรณ์ตามวันเวลา  
+              พร้อมบันทึกผู้ยืมอัตโนมัติในระบบ
+            </p>
+          </div>
+        </div>
+
+        {{-- ขั้นตอน 3 --}}
+        <div class="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition relative overflow-hidden">
+          <div class="absolute -top-10 -right-10 w-32 h-32 bg-pink-100 rounded-full blur-xl group-hover:bg-pink-200 transition"></div>
+          <div class="relative z-10">
+            <div class="bg-pink-500 text-white w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">🔁</div>
+            <h3 class="text-xl font-bold text-pink-700 mb-2">ขั้นตอนที่ 3: คืนอุปกรณ์</h3>
+            <p class="text-gray-600">
+              เมื่อคืนอุปกรณ์ ระบบจะอัปเดตสถานะอัตโนมัติ  
+              พร้อมเก็บประวัติการยืม–คืนไว้ตรวจสอบภายหลัง
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+   {{-- 🔹 Footer --}}
   <footer class="bg-pink-200 py-5 text-center text-pink-700">
-    © 2025 ระบบการจองและยืมอุปกรณ์ อบอน. พัฒนาโดยทีม ซัน • รุสดี • อามีน • การิม
+    © 2025 ระบบการจองและยืมอุปกรณ์ อบศ. พัฒนาโดยองค์การบริหารนักศึกษา
   </footer>
 </body>
 </html>
