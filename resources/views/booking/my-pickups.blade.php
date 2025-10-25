@@ -61,9 +61,29 @@
                                     <p class="text-gray-500 text-sm">
                                         สถานที่ใช้งาน: {{ $b->location ?? '-' }}
                                     </p>
+
+                                    {{-- 🎓 ข้อมูลเพิ่มเติม --}}
+                                    <p class="text-gray-500 text-sm mt-2">
+                                        🎓 สาขา: <span class="font-medium text-gray-700">{{ $b->major ?? '-' }}</span>
+                                    </p>
+                                    <p class="text-gray-500 text-sm">
+                                        🏛️ คณะ: <span class="font-medium text-gray-700">{{ $b->faculty ?? '-' }}</span>
+                                    </p>
+                                    <p class="text-gray-500 text-sm mt-2">
+                                        🕒 เวลามารับ: 
+                                        <span class="font-medium text-gray-700">
+                                            {{ $b->pickup_time ? \Carbon\Carbon::parse($b->pickup_time)->format('H:i') : '-' }}
+                                        </span>
+                                    </p>
+                                    <p class="text-gray-500 text-sm">
+                                        🕓 เวลาคืน:
+                                        <span class="font-medium text-gray-700">
+                                            {{ $b->return_time ? \Carbon\Carbon::parse($b->return_time)->format('H:i') : '-' }}
+                                        </span>
+                                    </p>
                                 </div>
 
-                                {{-- 🕓 วันที่และสถานะ --}}
+                                {{-- 📅 วันที่และสถานะ --}}
                                 <div class="text-right">
                                     <p class="text-gray-500 text-sm">📆 วันนัดรับ:</p>
                                     <p class="text-lg font-semibold text-[#FF69B4]">
@@ -98,7 +118,7 @@
                                 </div>
                             @endif
 
-                            {{-- 🧾 ส่วนเพิ่ม: ฟอร์มคืนอุปกรณ์ --}}
+                            {{-- 🧾 ฟอร์มคืนอุปกรณ์ --}}
                             @if(in_array($b->status, ['picked_up', 'overdue']))
                                 <div class="mt-6 border-t border-pink-100 pt-5">
                                     <form action="{{ route('booking.return', $b->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3">

@@ -61,39 +61,53 @@
                             <thead class="bg-pink-200 text-pink-900 uppercase tracking-wide text-center">
                                 <tr>
                                     <th class="border px-4 py-3">ลำดับ</th>
+                                    <th class="border px-4 py-3">ชื่อผู้ยืม</th>
                                     <th class="border px-4 py-3">ชื่ออุปกรณ์</th>
-                                    <th class="border px-4 py-3">ผู้ยืม</th>
+                                    <th class="border px-4 py-3">คณะ</th>
+                                    <th class="border px-4 py-3">สาขา</th>
                                     <th class="border px-4 py-3">วันที่ยืม</th>
                                     <th class="border px-4 py-3">กำหนดคืน</th>
+                                    <th class="border px-4 py-3">เวลามารับ</th>
+                                    <th class="border px-4 py-3">เวลาคืน</th>
                                     <th class="border px-4 py-3">สถานะ</th>
                                     <th class="border px-4 py-3">การดำเนินการ</th>
                                 </tr>
                             </thead>
 
                             <tbody class="divide-y divide-pink-50 text-center">
-                                @foreach($bookings as $index => $booking)
+                                @foreach($bookings as $index => $b)
                                     <tr class="hover:bg-pink-50 transition duration-150 text-gray-700">
                                         <td class="border px-4 py-3">{{ $index + 1 }}</td>
-                                        <td class="border px-4 py-3 font-semibold text-gray-800">{{ $booking->equipment->name }}</td>
-                                        <td class="border px-4 py-3">{{ $booking->user->name ?? '-' }}</td>
-                                        <td class="border px-4 py-3">{{ \Carbon\Carbon::parse($booking->borrow_date)->format('d/m/Y') }}</td>
-                                        <td class="border px-4 py-3">{{ \Carbon\Carbon::parse($booking->return_date)->format('d/m/Y') }}</td>
-
-                                        {{-- สถานะการคืน --}}
+                                        <td class="border px-4 py-3">{{ optional($b->user)->name ?? '-' }}</td>
+                                        <td class="border px-4 py-3 font-semibold text-gray-800">
+                                            {{ optional($b->equipment)->name ?? '-' }}
+                                        </td>
+                                        <td class="border px-4 py-3">{{ $b->faculty ?? '-' }}</td>
+                                        <td class="border px-4 py-3">{{ $b->major ?? '-' }}</td>
+                                        <td class="border px-4 py-3">{{ \Carbon\Carbon::parse($b->borrow_date)->format('d/m/Y') }}</td>
+                                        <td class="border px-4 py-3">{{ \Carbon\Carbon::parse($b->return_date)->format('d/m/Y') }}</td>
                                         <td class="border px-4 py-3">
-                                            @if($booking->status === 'returned')
+                                            {{ $b->pickup_time ? \Carbon\Carbon::parse($b->pickup_time)->format('H:i') : '-' }}
+                                        </td>
+                                        <td class="border px-4 py-3">
+                                            {{ $b->return_time ? \Carbon\Carbon::parse($b->return_time)->format('H:i') : '-' }}
+                                        </td>
+
+                                        {{-- ✅ สถานะ --}}
+                                        <td class="border px-4 py-3">
+                                            @if($b->status === 'returned')
                                                 <span class="status-returned">คืนแล้ว</span>
-                                            @elseif(\Carbon\Carbon::parse($booking->return_date)->isPast() && $booking->status !== 'returned')
+                                            @elseif(\Carbon\Carbon::parse($b->return_date)->isPast() && $b->status !== 'returned')
                                                 <span class="status-overdue">เกินกำหนด</span>
                                             @else
                                                 <span class="status-pending">ยังไม่คืน</span>
                                             @endif
                                         </td>
 
-                                        {{-- ปุ่มดำเนินการ --}}
+                                        {{-- ⚙ ปุ่มดำเนินการ --}}
                                         <td class="border px-4 py-3">
-                                            @if($booking->status !== 'returned')
-                                                <form action="{{ route('booking.return', $booking->id) }}" method="POST" onsubmit="return confirm('ยืนยันการคืนอุปกรณ์นี้หรือไม่?')">
+                                            @if($b->status !== 'returned')
+                                                <form action="{{ route('booking.return', $b->id) }}" method="POST" onsubmit="return confirm('ยืนยันการคืนอุปกรณ์นี้หรือไม่?')">
                                                     @csrf
                                                     @method('PUT')
                                                     <button type="submit" class="btn-primary px-4 py-2 rounded-full text-sm">

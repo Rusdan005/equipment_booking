@@ -7,71 +7,83 @@
         </h2>
     </x-slot>
 
-    <div class="py-8">
+    <div class="py-8 bg-gradient-to-b from-pink-50 via-white to-pink-100 min-h-screen">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-8 border border-pink-100">
+            <div class="bg-white shadow-md rounded-2xl p-8 border border-pink-200">
 
-                {{-- ข้อมูลผู้จอง --}}
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-pink-600 mb-2">👤 ข้อมูลผู้จอง</h3>
-                    <p><strong>ชื่อ:</strong> {{ $booking->user->name ?? '-' }}</p>
-                    <p><strong>อีเมล:</strong> {{ $booking->user->email ?? '-' }}</p>
+                {{-- 👤 ข้อมูลผู้จอง --}}
+                <div class="mb-8 bg-pink-50 border border-pink-200 rounded-xl p-5">
+                    <h3 class="text-lg font-semibold text-pink-600 mb-3">👤 ข้อมูลผู้จอง</h3>
+                    <div class="space-y-2 text-gray-700">
+                        <p><strong>ชื่อ:</strong> {{ $booking->user->name ?? '-' }}</p>
+                        <p><strong>อีเมล:</strong> {{ $booking->user->email ?? '-' }}</p>
+                        <p><strong>คณะ:</strong> {{ $booking->faculty ?? '-' }}</p>
+                        <p><strong>สาขา:</strong> {{ $booking->major ?? '-' }}</p>
+                    </div>
                 </div>
 
-                {{-- ข้อมูลอุปกรณ์ --}}
-                <div class="mb-6">
+                {{-- 🎒 ข้อมูลอุปกรณ์ --}}
+                <div class="mb-8">
                     <h3 class="text-lg font-semibold text-pink-600 mb-2">🎒 ข้อมูลอุปกรณ์</h3>
-                    <p><strong>ชื่ออุปกรณ์:</strong> {{ $booking->equipment->name ?? '-' }}</p>
-                    <p><strong>ประเภท:</strong> {{ $booking->equipment->type ?? '-' }}</p>
+                    <div class="space-y-1 text-gray-700">
+                        <p><strong>ชื่ออุปกรณ์:</strong> {{ $booking->equipment->name ?? '-' }}</p>
+                        <p><strong>ประเภท:</strong> {{ $booking->equipment->type ?? '-' }}</p>
+                    </div>
                 </div>
 
-                {{-- ข้อมูลการจอง --}}
-                <div class="mb-6">
+                {{-- 📅 ข้อมูลการจอง --}}
+                <div class="mb-8">
                     <h3 class="text-lg font-semibold text-pink-600 mb-2">📅 รายละเอียดการจอง</h3>
-                    <p><strong>วันที่ยืม:</strong> {{ $booking->borrow_date }}</p>
-                    <p><strong>วันที่คืน:</strong> {{ $booking->return_date }}</p>
-                    <p><strong>สถานที่ใช้งาน:</strong> {{ $booking->location }}</p>
-                    <p><strong>วัตถุประสงค์:</strong> {{ $booking->purpose }}</p>
-                    <p><strong>สถานะ:</strong> 
-                        <span class="font-bold 
-                            @if($booking->status === 'pending') text-yellow-500 
-                            @elseif($booking->status === 'approved') text-green-500 
-                            @elseif($booking->status === 'rejected') text-red-500 
-                            @endif">
-                            {{ strtoupper($booking->status) }}
-                        </span>
-                    </p>
+                    <div class="space-y-1 text-gray-700">
+                        <p><strong>วันที่ยืม:</strong> {{ \Carbon\Carbon::parse($booking->borrow_date)->format('d/m/Y') }}</p>
+                        <p><strong>วันที่คืน:</strong> {{ \Carbon\Carbon::parse($booking->return_date)->format('d/m/Y') }}</p>
+                        <p><strong>สถานที่ใช้งาน:</strong> {{ $booking->location ?? '-' }}</p>
+                        <p><strong>วัตถุประสงค์:</strong> {{ $booking->purpose ?? '-' }}</p>
+                        <p><strong>เวลามารับ:</strong> {{ $booking->pickup_time ? \Carbon\Carbon::parse($booking->pickup_time)->format('H:i') : '-' }}</p>
+                        <p><strong>เวลาคืน:</strong> {{ $booking->return_time ? \Carbon\Carbon::parse($booking->return_time)->format('H:i') : '-' }}</p>
+                        <p>
+                            <strong>สถานะ:</strong>
+                            <span class="font-bold 
+                                @if($booking->status === 'pending') text-yellow-500 
+                                @elseif($booking->status === 'approved') text-green-500 
+                                @elseif($booking->status === 'rejected') text-red-500 
+                                @endif">
+                                {{ strtoupper($booking->status) }}
+                            </span>
+                        </p>
+                    </div>
                 </div>
 
-                {{-- ปุ่มอนุมัติ / ปฏิเสธ --}}
+                {{-- ✅ ปุ่มอนุมัติ / ❌ ปฏิเสธ --}}
                 @if($booking->status === 'pending')
                     <div class="flex items-center gap-4 mt-8">
-                        {{-- ✅ อนุมัติ --}}
-                        <form action="{{ route('manage.bookings.review.approve', $booking->id) }}" method="POST" onsubmit="return confirm('ยืนยันการอนุมัติคำขอนี้หรือไม่?');">
+                        {{-- ✅ อนุมัติ (Outline เขียว) --}}
+                        <form action="{{ route('manage.bookings.review.approve', $booking->id) }}" method="POST" 
+                              onsubmit="return confirm('ยืนยันการอนุมัติคำขอนี้หรือไม่?');">
                             @csrf
                             <button type="submit" 
-                                class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-md transition">
+                                class="px-6 py-2 border-2 border-green-500 text-green-600 rounded-full font-medium hover:bg-green-50 transition transform hover:scale-105">
                                 ✅ อนุมัติ
                             </button>
                         </form>
 
-                        {{-- ❌ ปฏิเสธ --}}
+                        {{-- ❌ ปฏิเสธ (Outline แดง) --}}
                         <button 
                             onclick="document.getElementById('rejectModal').classList.remove('hidden')" 
-                            class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md transition">
+                            class="px-6 py-2 border-2 border-red-500 text-red-600 rounded-full font-medium hover:bg-red-50 transition transform hover:scale-105">
                             ❌ ปฏิเสธ
                         </button>
                     </div>
                 @else
                     <div class="mt-6 text-gray-500 italic">
-                        ⚠️ คำขอนี้ได้รับการพิจารณาแล้ว ({{ $booking->status }})
+                        ⚠️ คำขอนี้ได้รับการพิจารณาแล้ว ({{ strtoupper($booking->status) }})
                     </div>
                 @endif
 
                 {{-- 🔙 ปุ่มย้อนกลับ --}}
                 <div class="mt-10">
-                    <a href="{{ route('manage.bookings.review.index') }}"
-                        class="text-pink-500 hover:text-pink-700 underline">
+                    <a href="{{ route('manage.bookings.review.index') }}" 
+                       class="text-pink-500 hover:text-pink-700 underline">
                         ← กลับไปหน้าพิจารณาการจอง
                     </a>
                 </div>
@@ -80,27 +92,39 @@
     </div>
 
     {{-- 🔹 Modal สำหรับปฏิเสธ --}}
-    <div id="rejectModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md border border-pink-200">
-            <h3 class="text-lg font-semibold text-red-600 mb-3">ปฏิเสธคำขอจอง</h3>
+    <div id="rejectModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md border border-pink-200 animate-fade-in">
+            <h3 class="text-lg font-semibold text-red-500 mb-4 flex items-center gap-2">
+                <span class="text-2xl">⚠️</span> ปฏิเสธคำขอจอง
+            </h3>
+
             <form action="{{ route('manage.bookings.review.reject', $booking->id) }}" method="POST">
                 @csrf
                 <label class="block mb-2 text-gray-700 font-medium">เหตุผลในการปฏิเสธ:</label>
                 <textarea name="reject_reason" rows="3" required
-                    class="w-full border border-gray-300 rounded-md p-2 focus:ring-pink-400 focus:border-pink-400"></textarea>
+                    class="w-full border border-pink-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-400 focus:outline-none"></textarea>
 
-                <div class="flex justify-end gap-3 mt-4">
-                    <button type="button" 
+                <div class="flex justify-end gap-3 mt-5">
+                    <button type="button"
                         onclick="document.getElementById('rejectModal').classList.add('hidden')"
-                        class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-100">
+                        class="px-5 py-2 border border-gray-300 text-gray-600 rounded-full hover:bg-gray-100 transition">
                         ยกเลิก
                     </button>
-                    <button type="submit" 
-                        class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md">
-                        ยืนยันปฏิเสธ
+
+                    <button type="submit"
+                        class="px-5 py-2 border-2 border-red-500 text-red-600 rounded-full font-medium hover:bg-red-50 transform hover:scale-105 transition">
+                        🚫 ยืนยันปฏิเสธ
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in { animation: fade-in 0.25s ease-out; }
+    </style>
 </x-app-layout>

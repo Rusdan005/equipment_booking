@@ -57,30 +57,63 @@
                                         {{-- ปุ่มดำเนินการ --}}
                                         <td class="border px-4 py-3 text-center">
                                             @if($item->is_available)
-                                                <form action="{{ route('booking.store') }}" method="POST" class="flex flex-col sm:flex-row items-center justify-center gap-2">
+                                                <form action="{{ route('booking.store') }}" method="POST" class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2">
                                                     @csrf
                                                     <input type="hidden" name="equipment_id" value="{{ $item->id }}">
-                                                    
+
+                                                    {{-- 📅 วันที่ยืม / คืน --}}
                                                     <div class="flex flex-col sm:flex-row gap-2">
                                                         <input type="date" name="borrow_date"
-                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400"
                                                             required>
                                                         <input type="date" name="return_date"
-                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400"
                                                             required>
                                                     </div>
 
-                                                    <input type="text" name="purpose"
-                                                        placeholder="วัตถุประสงค์"
-                                                        class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none mt-2 sm:mt-0"
+                                                    {{-- 🕒 เวลารับ / คืน --}}
+                                                    <div class="flex flex-col sm:flex-row gap-2">
+                                                        <input type="time" name="pickup_time"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400"
+                                                            required>
+                                                        <input type="time" name="return_time"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400"
+                                                            required>
+                                                    </div>
+
+                                                    {{-- 🎓 สาขา / คณะ --}}
+                                                    <div class="flex flex-col sm:flex-row gap-2">
+                                                        <input type="text" name="major"
+                                                            placeholder="สาขา"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400"
+                                                            required>
+                                                        <input type="text" name="faculty"
+                                                            placeholder="คณะ"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400"
+                                                            required>
+                                                    </div>
+
+                                                    {{-- 📍 สถานที่ / วัตถุประสงค์ --}}
+                                                    <div class="flex flex-col sm:flex-row gap-2">
+                                                        <input type="text" name="location"
+                                                            placeholder="สถานที่ใช้งาน"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400">
+                                                        <input type="text" name="purpose"
+                                                            placeholder="วัตถุประสงค์"
+                                                            class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400"
+                                                            required>
+                                                    </div>
+
+                                                    {{-- 🔢 จำนวน --}}
+                                                    <input type="number" name="quantity"
+                                                        placeholder="จำนวน"
+                                                        min="1"
+                                                        class="border border-pink-200 rounded-lg px-3 py-1 text-sm w-20 focus:ring-2 focus:ring-pink-400"
                                                         required>
 
-                                                    <input type="text" name="location"
-                                                        placeholder="สถานที่ใช้งาน (ถ้ามี)"
-                                                        class="border border-pink-200 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none mt-2 sm:mt-0">
-
+                                                    {{-- ปุ่มจอง --}}
                                                     <button type="submit"
-                                                        class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-full shadow-md transition duration-200 text-sm font-medium mt-2 sm:mt-0">
+                                                        class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-full shadow-md transition duration-200 text-sm font-medium">
                                                         จองใช้งาน
                                                     </button>
                                                 </form>

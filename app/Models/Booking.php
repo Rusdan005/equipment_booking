@@ -17,10 +17,15 @@ class Booking extends Model
         'equipment_id',
         'borrow_date',
         'return_date',
-        'purpose',
-        'location',
-        'status',
-        'approved_by',
+        'pickup_time',     // 🕒 เวลามารับ
+        'return_time',     // 🕒 เวลาคืน
+        'purpose',         // 🎯 วัตถุประสงค์
+        'location',        // 📍 สถานที่ใช้งาน
+        'major',           // 🎓 สาขา
+        'faculty',         // 🏛️ คณะ
+        'quantity',        // 🔢 จำนวนที่ยืม
+        'status',          // 📦 สถานะ
+        'approved_by',     // 👨‍💼 ผู้อนุมัติ
         'approved_at',
         'reject_reason',
         'picked_up_at',

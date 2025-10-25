@@ -10,48 +10,82 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
-    // 🔸 หน้าแสดงรายการอุปกรณ์ทั้งหมด
+    /**
+     * 🔸 หน้าแสดงรายการอุปกรณ์ทั้งหมด
+     */
     public function index()
     {
         $equipments = Equipment::where('is_available', true)->get();
         return view('booking.index', compact('equipments'));
     }
 
-    // 🔸 หน้าแบบฟอร์มจองอุปกรณ์
+    /**
+     * 🔸 หน้าแบบฟอร์มจองอุปกรณ์
+     */
     public function create()
     {
         $equipments = Equipment::where('is_available', true)->get();
         return view('booking.create', compact('equipments'));
     }
 
-    // 🔸 ฟังก์ชันบันทึกข้อมูลการจอง
+    /**
+     * 🔸 ฟังก์ชันบันทึกข้อมูลการจอง
+     */
     public function store(Request $request)
     {
         $request->validate([
             'equipment_id' => 'required|exists:equipments,id',
-            'borrow_date' => 'required|date|after_or_equal:today',
-            'return_date' => 'required|date|after:borrow_date',
-            'purpose' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
+            'borrow_date'  => 'required|date|after_or_equal:today',
+            'return_date'  => 'required|date|after:borrow_date',
+            'pickup_time'  => 'required',
+            'return_time'  => 'required',
+            'purpose'      => 'required|string|max:255',
+            'location'     => 'nullable|string|max:255',
+            'major'        => 'nullable|string|max:255',
+            'faculty'      => 'nullable|string|max:255',
+            'quantity'     => 'required|integer|min:1',
         ]);
 
+        $equipment = Equipment::findOrFail($request->equipment_id);
+
+        // ✅ ตรวจสอบว่าจำนวนที่จองไม่เกินจำนวนที่ว่าง
+        if ($request->quantity > $equipment->available) {
+            return back()->with('error', '❌ จำนวนที่จองเกินจำนวนที่ว่าง!');
+        }
+
+        // ✅ บันทึกข้อมูลการจอง
         Booking::create([
-            'user_id' => Auth::id(),
+            'user_id'      => Auth::id(),
             'equipment_id' => $request->equipment_id,
-            'borrow_date' => $request->borrow_date,
-            'return_date' => $request->return_date,
-            'purpose' => $request->purpose,
-            'location' => $request->location,
-            'status' => 'pending',
+            'borrow_date'  => $request->borrow_date,
+            'return_date'  => $request->return_date,
+            'pickup_time'  => $request->pickup_time,
+            'return_time'  => $request->return_time,
+            'purpose'      => $request->purpose,
+            'location'     => $request->location,
+            'major'        => $request->major,
+            'faculty'      => $request->faculty,
+            'quantity'     => $request->quantity,
+            'status'       => 'pending',
         ]);
 
-        Equipment::where('id', $request->equipment_id)->update(['is_available' => false]);
+        // ✅ ปรับจำนวนอุปกรณ์ที่เหลือ
+        $equipment->available = max(0, $equipment->available - $request->quantity);
+
+        // ถ้าของหมด → ปิดสถานะให้ยืม
+        if ($equipment->available <= 0) {
+            $equipment->is_available = false;
+        }
+
+        $equipment->save();
 
         return redirect()->route('booking.index')
             ->with('success', '🎉 ทำการจองเรียบร้อยแล้ว! กรุณารอการอนุมัติ');
     }
 
-    // 🟢 แสดงหน้าตรวจสอบการคืนอุปกรณ์ (สำหรับ Staff/Admin)
+    /**
+     * 🟢 แสดงหน้าตรวจสอบการคืนอุปกรณ์ (สำหรับ Staff/Admin)
+     */
     public function returnList()
     {
         $bookings = Booking::with(['user', 'equipment'])
@@ -61,7 +95,9 @@ class BookingController extends Controller
         return view('booking.return', compact('bookings'));
     }
 
-    // ✅ ฟังก์ชันคืนอุปกรณ์ + บันทึกรูป + คิดค่าปรับ
+    /**
+     * ✅ ฟังก์ชันคืนอุปกรณ์ + บันทึกรูป + คิดค่าปรับ
+     */
     public function markAsReturned(Request $request, $id)
     {
         $booking = Booking::with('equipment')->findOrFail($id);
@@ -73,7 +109,6 @@ class BookingController extends Controller
             $request->validate([
                 'return_photo' => 'image|mimes:jpeg,png,jpg|max:5120', // สูงสุด 5MB
             ]);
-
             $photoPath = $request->file('return_photo')->store('returns', 'public');
         }
 
@@ -85,10 +120,10 @@ class BookingController extends Controller
             // ✅ บันทึกค่าปรับ
             Fine::create([
                 'booking_id' => $booking->id,
-                'user_id' => $booking->user_id,
-                'amount' => $fineAmount,
-                'reason' => "คืนช้า {$daysLate} วัน",
-                'status' => 'pending',
+                'user_id'    => $booking->user_id,
+                'amount'     => $fineAmount,
+                'reason'     => "คืนช้า {$daysLate} วัน",
+                'status'     => 'pending',
             ]);
 
             $booking->status = 'overdue';
@@ -97,16 +132,20 @@ class BookingController extends Controller
         }
 
         $booking->returned_at = $today;
-        $booking->return_photo = $photoPath; // 🧾 บันทึกรูปหลักฐาน
+        $booking->return_photo = $photoPath;
         $booking->save();
 
-        // ✅ ปล่อยอุปกรณ์ให้ว่างอีกครั้ง
-        $booking->equipment->update(['is_available' => true]);
+        // ✅ ปล่อยอุปกรณ์กลับมาว่างอีกครั้ง
+        $booking->equipment->available += $booking->quantity;
+        $booking->equipment->is_available = true;
+        $booking->equipment->save();
 
         return back()->with('success', '✅ คืนอุปกรณ์และบันทึกรูปเรียบร้อยแล้ว!');
     }
 
-    // 📦 แสดงหน้ารายการอุปกรณ์ของฉัน
+    /**
+     * 📦 แสดงหน้ารายการอุปกรณ์ของฉัน
+     */
     public function myPickups()
     {
         $bookings = Booking::with('equipment')

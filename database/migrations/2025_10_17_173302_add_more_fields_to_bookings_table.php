@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
+            // ✅ เพิ่ม usage_type, location, purpose (กันซ้ำ)
             if (!Schema::hasColumn('bookings', 'usage_type')) {
                 $table->string('usage_type')->nullable()->after('return_date');
             }
@@ -23,6 +24,23 @@ return new class extends Migration
             if (!Schema::hasColumn('bookings', 'purpose')) {
                 $table->text('purpose')->nullable()->after('location');
             }
+
+            // ✅ เพิ่มฟิลด์ใหม่ สาขา / คณะ / เวลารับ / เวลาคืน
+            if (!Schema::hasColumn('bookings', 'major')) {
+                $table->string('major')->nullable()->after('purpose');
+            }
+
+            if (!Schema::hasColumn('bookings', 'faculty')) {
+                $table->string('faculty')->nullable()->after('major');
+            }
+
+            if (!Schema::hasColumn('bookings', 'pickup_time')) {
+                $table->time('pickup_time')->nullable()->after('return_date');
+            }
+
+            if (!Schema::hasColumn('bookings', 'return_time')) {
+                $table->time('return_time')->nullable()->after('pickup_time');
+            }
         });
     }
 
@@ -32,14 +50,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            if (Schema::hasColumn('bookings', 'usage_type')) {
-                $table->dropColumn('usage_type');
-            }
-            if (Schema::hasColumn('bookings', 'location')) {
-                $table->dropColumn('location');
-            }
-            if (Schema::hasColumn('bookings', 'purpose')) {
-                $table->dropColumn('purpose');
+            $columns = [
+                'usage_type', 'location', 'purpose',
+                'major', 'faculty', 'pickup_time', 'return_time'
+            ];
+
+            foreach ($columns as $column) {
+                if (Schema::hasColumn('bookings', $column)) {
+                    $table->dropColumn($column);
+                }
             }
         });
     }

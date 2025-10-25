@@ -31,7 +31,7 @@
                 </button>
                 <a href="{{ route('booking.index') }}"
                    class="px-6 py-3 rounded-lg font-semibold bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 shadow">
-                   รายการจอง
+                  รายการอุปกรณ์ที่เปิดให้จอง
                 </a>
             </div>
 
@@ -132,11 +132,11 @@
                     {{-- 🔸 เพิ่ม สาขา + คณะ --}}
                     <div>
                         <label class="text-sm font-semibold">สาขา</label>
-                        <input type="text" name="major" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
+                        <input type="text" name="major" placeholder="เช่น วิทยาการคอมพิวเตอร์" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
                     </div>
                     <div>
                         <label class="text-sm font-semibold">คณะ</label>
-                        <input type="text" name="faculty" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
+                        <input type="text" name="faculty" placeholder="เช่น คณะวิทยาศาสตร์เทคโนโลยี" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400" required>
                     </div>
 
                     <div>
