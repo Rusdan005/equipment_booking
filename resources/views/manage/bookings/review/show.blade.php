@@ -47,6 +47,7 @@
                                 @if($booking->status === 'pending') text-yellow-500 
                                 @elseif($booking->status === 'approved') text-green-500 
                                 @elseif($booking->status === 'rejected') text-red-500 
+                                @elseif($booking->status === 'returned') text-green-600 
                                 @endif">
                                 {{ strtoupper($booking->status) }}
                             </span>
@@ -54,12 +55,23 @@
                     </div>
                 </div>
 
+                {{-- 🧾 หลักฐานการคืนอุปกรณ์ --}}
+                @if($booking->return_photo)
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-pink-600 mb-3">🧾 หลักฐานการคืนอุปกรณ์</h3>
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                            <p class="text-green-700 font-medium mb-3">✅ ผู้ใช้ได้คืนอุปกรณ์เรียบร้อยแล้ว</p>
+                            <img src="{{ asset('storage/' . $booking->return_photo) }}"
+                                 alt="หลักฐานการคืนอุปกรณ์"
+                                 class="rounded-xl border border-gray-200 shadow-md w-72">
+                        </div>
+                    </div>
+                @endif
+
                 {{-- ✅ ปุ่มอนุมัติ / ❌ ปฏิเสธ --}}
                 @if($booking->status === 'pending')
                     <div class="flex items-center gap-4 mt-8">
-                        {{-- ✅ อนุมัติ (Outline เขียว) --}}
-                        <form action="{{ route('manage.bookings.review.approve', $booking->id) }}" method="POST" 
-                              onsubmit="return confirm('ยืนยันการอนุมัติคำขอนี้หรือไม่?');">
+                        <form action="{{ route('manage.bookings.review.approve', $booking->id) }}" method="POST" onsubmit="return confirm('ยืนยันการอนุมัติคำขอนี้หรือไม่?');">
                             @csrf
                             <button type="submit" 
                                 class="px-6 py-2 border-2 border-green-500 text-green-600 rounded-full font-medium hover:bg-green-50 transition transform hover:scale-105">
@@ -67,7 +79,6 @@
                             </button>
                         </form>
 
-                        {{-- ❌ ปฏิเสธ (Outline แดง) --}}
                         <button 
                             onclick="document.getElementById('rejectModal').classList.remove('hidden')" 
                             class="px-6 py-2 border-2 border-red-500 text-red-600 rounded-full font-medium hover:bg-red-50 transition transform hover:scale-105">

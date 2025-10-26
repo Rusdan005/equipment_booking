@@ -7,6 +7,13 @@ use App\Models\Booking;
 use App\Models\Fine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+// ❌ ไม่จำเป็นต้อง use Controller ตัวเอง
+// use App\Http\Controllers\BookingController; 
+
+// ❌ Route ต้องย้ายไปไฟล์ routes/web.php
+// Route::put('/booking/{id}/picked-up', [BookingController::class, 'markAsPickedUp'])
+//     ->name('booking.picked');
 
 class BookingController extends Controller
 {
@@ -48,7 +55,7 @@ class BookingController extends Controller
 
         $equipment = Equipment::findOrFail($request->equipment_id);
 
-        // ✅ ตรวจสอบว่าจำนวนที่จองไม่เกินจำนวนที่ว่าง
+        // ✅ ตรวจสอบจำนวนที่จองไม่เกินของที่เหลือ
         if ($request->quantity > $equipment->available) {
             return back()->with('error', '❌ จำนวนที่จองเกินจำนวนที่ว่าง!');
         }
@@ -69,19 +76,27 @@ class BookingController extends Controller
             'status'       => 'pending',
         ]);
 
-        // ✅ ปรับจำนวนอุปกรณ์ที่เหลือ
+        // ✅ อัปเดตจำนวนอุปกรณ์ที่เหลือ
         $equipment->available = max(0, $equipment->available - $request->quantity);
-
-        // ถ้าของหมด → ปิดสถานะให้ยืม
         if ($equipment->available <= 0) {
             $equipment->is_available = false;
         }
-
         $equipment->save();
 
         return redirect()->route('booking.index')
             ->with('success', '🎉 ทำการจองเรียบร้อยแล้ว! กรุณารอการอนุมัติ');
     }
+
+        public function equipmentList()
+{
+    // ดึงข้อมูลอุปกรณ์ทั้งหมดที่พร้อมให้จอง
+    $equipments = \App\Models\Equipment::where('is_available', 1)
+        ->orderBy('name', 'asc')
+        ->get();
+
+    // ส่งไปยังหน้า view
+    return view('booking.equipment-list', compact('equipments'));
+}
 
     /**
      * 🟢 แสดงหน้าตรวจสอบการคืนอุปกรณ์ (สำหรับ Staff/Admin)
@@ -96,28 +111,34 @@ class BookingController extends Controller
     }
 
     /**
-     * ✅ ฟังก์ชันคืนอุปกรณ์ + บันทึกรูป + คิดค่าปรับ
+     * ✅ ฟังก์ชันคืนอุปกรณ์ + บันทึกรูป + ปรับสถานะ + คิดค่าปรับ (ใช้ได้ทั้ง user/staff)
      */
-    public function markAsReturned(Request $request, $id)
+    public function returnEquipment(Request $request, $id)
     {
         $booking = Booking::with('equipment')->findOrFail($id);
         $today = now();
 
-        // ✅ ตรวจสอบและบันทึกรูปตอนคืน
-        $photoPath = null;
+        // ✅ ตรวจสอบรูปและบันทึกไฟล์
         if ($request->hasFile('return_photo')) {
             $request->validate([
-                'return_photo' => 'image|mimes:jpeg,png,jpg|max:5120', // สูงสุด 5MB
+                'return_photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             ]);
-            $photoPath = $request->file('return_photo')->store('returns', 'public');
+
+            // ลบรูปเก่าถ้ามี
+            if ($booking->return_photo && Storage::disk('public')->exists($booking->return_photo)) {
+                Storage::disk('public')->delete($booking->return_photo);
+            }
+
+            // เก็บรูปใหม่ใน storage/app/public/returns/
+            $path = $request->file('return_photo')->store('returns', 'public');
+            $booking->return_photo = $path;
         }
 
-        // 🔍 ตรวจว่าคืนช้าหรือไม่
+        // ✅ ตรวจสอบการคืนช้า
         if ($today->gt($booking->return_date)) {
             $daysLate = $today->diffInDays($booking->return_date);
-            $fineAmount = $daysLate * 50; // 💰 คิด 50 บาท/วัน
+            $fineAmount = $daysLate * 50; // 💰 50 บาทต่อวัน
 
-            // ✅ บันทึกค่าปรับ
             Fine::create([
                 'booking_id' => $booking->id,
                 'user_id'    => $booking->user_id,
@@ -131,16 +152,16 @@ class BookingController extends Controller
             $booking->status = 'returned';
         }
 
+        // ✅ อัปเดตข้อมูลการคืน
         $booking->returned_at = $today;
-        $booking->return_photo = $photoPath;
         $booking->save();
 
-        // ✅ ปล่อยอุปกรณ์กลับมาว่างอีกครั้ง
+        // ✅ ปล่อยอุปกรณ์กลับมาว่าง
         $booking->equipment->available += $booking->quantity;
         $booking->equipment->is_available = true;
         $booking->equipment->save();
 
-        return back()->with('success', '✅ คืนอุปกรณ์และบันทึกรูปเรียบร้อยแล้ว!');
+        return redirect()->back()->with('success', '✅ คืนอุปกรณ์และบันทึกรูปเรียบร้อยแล้ว!');
     }
 
     /**
@@ -155,5 +176,24 @@ class BookingController extends Controller
             ->get();
 
         return view('booking.my-pickups', compact('bookings'));
+    }
+
+    // ✨✨✨ [เพิ่มใหม่] เมธอดที่ขาดหายไป ✨✨✨
+    /**
+     * 🚚 อัปเดตสถานะเป็น "รับของแล้ว" (Picked Up)
+     */
+    public function markAsPickedUp($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        // (แนะนำ) คุณอาจต้องการตรวจสอบสิทธิ์ตรงนี้
+        // เช่น check ว่าเป็น admin หรือเป็นเจ้าของ booking ที่มีสถานะ 'approved'
+        
+        // อัปเดตสถานะ
+        $booking->status = 'picked_up';
+        // $booking->picked_up_at = now(); // (ถ้ามีคอลัมน์นี้ใน DB)
+        $booking->save();
+
+        return redirect()->back()->with('success', '🚚 บันทึกการรับอุปกรณ์เรียบร้อยแล้ว');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Equipment; // ✨ [ย้ายมา] ย้าย use มาไว้ตรงนี้
 
 class ManageBookingController extends Controller
 {
@@ -169,5 +170,65 @@ class ManageBookingController extends Controller
         $booking->equipment->update(['is_available' => true]);
 
         return back()->with('success', '✅ บันทึกการคืนอุปกรณ์เรียบร้อยแล้ว!');
+    }
+
+    // ----------------------------------------------------------------------
+    // 🗑️ ลบอุปกรณ์
+    // ----------------------------------------------------------------------
+    public function destroy($id)
+    {
+        $equipment = Equipment::findOrFail($id); // ✨ [แก้ไข] ลบ \ (backslash) ออก
+        $equipment->delete();
+
+        return redirect()->back()->with('success', 'ลบอุปกรณ์เรียบร้อยแล้ว!');
+    }
+    
+    // ❌ [ลบออก] 'use App\Models\Equipment;' ที่อยู่ผิดที่ ถูกย้ายไปข้างบนแล้ว
+
+    // ----------------------------------------------------------------------
+    // ➕ เพิ่มอุปกรณ์ใหม่
+    // ----------------------------------------------------------------------
+    public function create()
+    {
+        return view('manage.equipment.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'type' => 'nullable|string|max:50',
+            'code' => 'nullable|string|max:50|unique:equipments,code',
+            'is_available' => 'boolean'
+        ]);
+
+        Equipment::create($validated);
+
+        return redirect()->route('equipment.index')->with('success', '✅ เพิ่มอุปกรณ์เรียบร้อยแล้ว!');
+    }
+
+    // ----------------------------------------------------------------------
+    // ✏️ แก้ไขอุปกรณ์
+    // ----------------------------------------------------------------------
+    public function edit($id)
+    {
+        $equipment = Equipment::findOrFail($id);
+        return view('manage.equipment.edit', compact('equipment'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $equipment = Equipment::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'type' => 'nullable|string|max:50',
+            'code' => 'nullable|string|max:50|unique:equipments,code,' . $equipment->id,
+            'is_available' => 'boolean'
+        ]);
+
+        $equipment->update($validated);
+
+        return redirect()->route('equipment.index')->with('success', '✏️ แก้ไขอุปกรณ์เรียบร้อยแล้ว!');
     }
 }
