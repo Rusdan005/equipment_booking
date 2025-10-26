@@ -49,7 +49,7 @@
                         ✅ {{ session('success') }}
                     </div>
                 @endif
-
+                    
                 {{-- 🧾 ตารางรายการคืนอุปกรณ์ --}}
                 @if($bookings->isEmpty())
                     <div class="text-center py-16 text-gray-500 text-lg">

@@ -31,3 +31,5 @@ return new class extends Migration
         });
     }
 };
+
+// โค้ดส่วนเกินที่อยู่ตรงนี้ ถูกลบออกไปแล้วครับ
