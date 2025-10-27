@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ✨ Custom CSS for background image with overlay */
+.custom-background-pattern {
+    background-image: url('/images/abc.jpg'); /* ใช้รูปภาพที่คุณระบุ */
+    background-size: cover;
+    background-position: center;
+    position: relative; /* สำคัญสำหรับการสร้าง Overlay */
+    z-index: 1; /* ให้รูปภาพอยู่ด้านล่างสุด */
+}
+
+/* เพิ่ม overlay สีชมพูเพื่อครอบรูปภาพ และปรับความทึบ */
+.custom-background-pattern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(236, 72, 153, 0.7); /* สีชมพูเข้ม (pink-500) โปร่งใส 70% */
+    z-index: -1; /* ให้อยู่ใต้เนื้อหา แต่เหนือรูปภาพ */
+}
+
+.w-full.max-w-md.bg-white\/80.backdrop-blur-sm.shadow-2xl.shadow-pink-900\/30.rounded-2xl.p-8.border.border-white\/50.relative.overflow-hidden {
+    position: relative; 
+    z-index: 10; /* ให้การ์ดอยู่เหนือ overlay ของพื้นหลัง */
+}
+
+/* โค้ดสำหรับลวดลายดอกไม้ที่มุม (ผมคอมเมนต์ไว้ก่อน) 
+   ถ้าคุณมีไฟล์รูปดอกไม้เล็กๆ ค่อยเปิดใช้งานครับ 
+*/
+/*
+.w-full.max-w-md.bg-white\/80...::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: -30px;
+    width: 120px;
+    height: 120px;
+    background-image: url('/images/small_flower_pattern.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+    z-index: -1;
+}
+*/
