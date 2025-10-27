@@ -21,6 +21,7 @@
                         <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>⏳ รอพิจารณา</option>
                         <option value="approved" {{ request('status')=='approved' ? 'selected' : '' }}>✅ อนุมัติแล้ว</option>
                         <option value="picked_up" {{ request('status')=='picked_up' ? 'selected' : '' }}>📦 รับแล้ว</option>
+                        <option value="overdue" {{ request('status')=='overdue' ? 'selected' : '' }}>🚨 เลยกำหนด</option>
                         <option value="returned" {{ request('status')=='returned' ? 'selected' : '' }}>📬 คืนแล้ว</option>
                         <option value="rejected" {{ request('status')=='rejected' ? 'selected' : '' }}>❌ ถูกปฏิเสธ</option>
                     </select>
@@ -30,6 +31,8 @@
                         ค้นหา
                     </button>
                 </form>
+                
+                <hr class="mb-6 border-pink-100">
 
                 {{-- 📋 ตารางข้อมูล --}}
                 <div class="overflow-x-auto">
@@ -63,6 +66,10 @@
                                                 @break
                                             @case('picked_up')
                                                 <span class="text-green-600 font-semibold">📦 รับแล้ว</span>
+                                                @break
+                                            @case('overdue')
+                                                {{-- **เพิ่มสถานะ "เลยกำหนด"** --}}
+                                                <span class="text-red-600 font-semibold">🚨 เลยกำหนด</span> 
                                                 @break
                                             @case('returned')
                                                 <span class="text-gray-700 font-semibold">📬 คืนแล้ว</span>

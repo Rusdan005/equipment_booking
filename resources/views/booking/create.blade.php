@@ -34,23 +34,6 @@
                   รายการอุปกรณ์ที่เปิดให้จอง
                 </a>
             </div>
-
-            {{-- 🔍 ช่องค้นหา --}}
-            <div class="flex flex-col sm:flex-row items-center gap-4 mb-8">
-                <div class="relative w-full sm:w-3/4">
-                    <input type="text" id="searchInput" placeholder="🔍 ค้นหาอุปกรณ์..."
-                        class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 focus:ring-2 focus:ring-pink-400 focus:border-pink-400">
-                </div>
-                <select id="filterType"
-                        class="rounded-lg border border-gray-300 px-4 py-3 text-gray-700 focus:ring-2 focus:ring-pink-400">
-                    <option value="">ทุกประเภท</option>
-                    <option value="กีฬา">กีฬา</option>
-                    <option value="ห้อง">ห้อง</option>
-                    <option value="เครื่องครัว">เครื่องครัว</option>
-                </select>
-            </div>
-            <a href="{{ route('manage.masterdata.index') }}" class="...">➕ เพิ่มอุปกรณ์ใหม่</a>
-
             {{-- 🎒 รายการอุปกรณ์ --}}
             <div id="equipmentList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 @foreach($equipments as $item)

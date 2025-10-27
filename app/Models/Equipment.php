@@ -15,6 +15,7 @@ class Equipment extends Model
     protected $fillable = [
         'name',
         'type',
+        'serial_number', // <-- เพิ่มฟิลด์นี้เข้ามา
         'description',
         'available',
         'total',
@@ -22,3 +23,4 @@ class Equipment extends Model
         'is_available',
     ];
 }
+

@@ -5,8 +5,8 @@
             
             {{-- ✨ [แก้ไข] ซ่อนปุ่มนี้ถ้าไม่ใช่ Admin/Staff --}}
             @if(auth()->check() && (auth()->user()->role == 'admin' || auth()->user()->role == 'staff'))
-                {{-- ✨ [แก้ไข] เปลี่ยนลิงก์ไปหน้า route 'equipment.create' --}}
-                <a href="{{ route('equipment.create') }}" 
+                {{-- ✨ [แก้ไข] เปลี่ยนลิงก์ไปหน้า route 'equipments.create' (เติม s) --}}
+                <a href="{{ route('equipments.create') }}" 
                    class="px-4 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition transform hover:scale-105">
                     ➕ เพิ่มอุปกรณ์ใหม่
                 </a>
@@ -43,7 +43,8 @@
                                         {{ $eq->name }}
                                     </h3>
                                     <p class="text-gray-600 text-sm">ประเภท: {{ $eq->type ?? '-' }}</p>
-                                    <p class="text-gray-600 text-sm">รหัสอุปกรณ์: {{ $eq->code ?? '-' }}</p>
+                                    {{-- ✨ [แก้ไข] เปลี่ยน $eq->code เป็น $eq->serial_number --}}
+                                    <p class="text-gray-600 text-sm">รหัสอุปกรณ์: {{ $eq->serial_number ?? '-' }}</p>
 
                                     {{-- 🔹 สถานะ --}}
                                     <p class="text-gray-600 text-sm mb-3">
@@ -69,14 +70,15 @@
                                         <div class="flex space-x-2">
                                             
                                             {{-- ปุ่มแก้ไข --}}
-                                            {{-- ✨ [แก้ไข] เปลี่ยนลิงก์ไปหน้า route 'equipment.edit' --}}
-                                            <a href="{{ route('equipment.edit', $eq->id) }}" 
+                                            {{-- ✨ [แก้ไข] เปลี่ยนลิงก์ไปหน้า route 'equipments.edit' (เติม s) --}}
+                                            <a href="{{ route('equipments.edit', $eq->id) }}" 
                                                class="px-3 py-2 bg-yellow-400 text-white text-sm rounded-full hover:bg-yellow-500 transition">
                                                 ✏️
                                             </a>
 
                                             {{-- ปุ่มลบ --}}
-                                            <form action="{{ route('equipment.destroy', $eq->id) }}" method="POST"
+                                            {{-- ✨ [แก้ไข] เปลี่ยนลิงก์ไปหน้า route 'equipments.destroy' (เติม s) --}}
+                                            <form action="{{ route('equipments.destroy', $eq->id) }}" method="POST"
                                                   onsubmit="return confirm('แน่ใจนะว่าจะลบอุปกรณ์นี้?');">
                                                 @csrf
                                                 @method('DELETE')
@@ -96,3 +98,4 @@
         </div>
     </div>
 </x-app-layout>
+

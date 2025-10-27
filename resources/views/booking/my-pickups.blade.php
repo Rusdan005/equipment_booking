@@ -118,58 +118,38 @@
                                 </div>
                             @endif
 
-                            {{-- ✅ ปุ่มยืนยันรับอุปกรณ์ --}}
-                            @if($b->status === 'approved')
-                                <form action="{{ route('booking.picked', $b->id) }}" method="POST" class="mt-5">
-                                    @csrf
-                                    @method('PUT')
-                                    <button type="submit"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full font-semibold shadow">
-                                        📦 ยืนยันการรับอุปกรณ์แล้ว
-                                    </button>
-                                </form>
-                            @endif
-
-                            {{-- 🧾 ฟอร์มคืนอุปกรณ์ (พร้อม Preview รูป) --}}
-                            @if(in_array($b->status, ['approved', 'picked_up', 'overdue']))
+                            {{-- 🧾 ฟอร์มคืนอุปกรณ์ (ปรับปรุงใหม่) --}}
+                            @if(in_array($b->status, ['picked_up', 'overdue']))
                                 <div class="mt-6 border-t border-pink-100 pt-5">
-                                    <form action="{{ route('booking.return', $b->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                    <h4 class="text-lg font-semibold text-pink-600 mb-3">คืนอุปกรณ์</h4>
+                                    
+                                    <form action="{{ route('booking.return', $b->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
                                         @csrf
                                         @method('PUT')
 
-                                        <label class="block text-sm font-medium text-gray-700">
-                                            📸 อัปโหลดรูปยืนยันการคืนอุปกรณ์:
+                                        <label class="block text-sm font-medium text-gray-600">
+                                            📸 อัปโหลดรูปยืนยันการคืน:
                                         </label>
-
-                                        <input type="file" name="return_photo" id="return_photo_{{ $b->id }}"
-                                            accept="image/*"
-                                            onchange="previewReturnImage(event, '{{ $b->id }}')"
+                                        
+                                        <input type="file" name="return_photo" accept="image/*" capture="camera"
                                             class="border border-pink-200 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-pink-400 focus:outline-none"
                                             required>
-
-                                        {{-- Preview รูปก่อนส่ง --}}
-                                        <div class="mt-3">
-                                            <img id="preview_{{ $b->id }}" 
-                                                 src="#" 
-                                                 alt="ตัวอย่างรูปคืนอุปกรณ์" 
-                                                 class="hidden w-48 rounded-lg border border-gray-200 shadow">
-                                        </div>
-
+                                            
                                         <button type="submit"
-                                            class="bg-[#FF69B4] hover:bg-[#ff4f9c] text-white px-5 py-2.5 rounded-full font-semibold shadow transition duration-200">
-                                            ✅ ยืนยันการคืนอุปกรณ์
+                                            class="bg-[#FF69B4] hover:bg-[#ff4f9c] text-white px-4 py-2 rounded-full font-medium shadow transition duration-200">
+                                            ✅ ยืนยันการคืน
                                         </button>
                                     </form>
                                 </div>
-
                             @elseif($b->status === 'returned')
                                 <div class="mt-5 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3">
                                     ✅ คืนอุปกรณ์เรียบร้อยแล้ว
                                     @if($b->return_photo)
                                         <div class="mt-3">
+                                            <p class="text-sm text-green-600 mb-1">หลักฐานการคืน:</p>
                                             <img src="{{ asset('storage/' . $b->return_photo) }}"
-                                                 alt="หลักฐานการคืน"
-                                                 class="rounded-lg border border-gray-200 shadow w-64">
+                                                alt="หลักฐานการคืน"
+                                                class="rounded-lg border border-gray-200 shadow w-64">
                                         </div>
                                     @endif
                                 </div>
@@ -180,21 +160,4 @@
             @endif
         </div>
     </div>
-
-    {{-- 🔸 Script Preview รูป --}}
-    <script>
-        function previewReturnImage(event, id) {
-            const input = event.target;
-            const preview = document.getElementById(`preview_${id}`);
-            
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    preview.src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
 </x-app-layout>
