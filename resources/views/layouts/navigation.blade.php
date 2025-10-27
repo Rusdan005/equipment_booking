@@ -1,5 +1,4 @@
 <style>
-    /* 🎀 ปุ่มขอบชมพู พื้นขาว ตัวอักษรชมพู */
     .btn-outline {
         background: #fff;
         color: #FF69B4;
@@ -16,7 +15,6 @@
         transform: scale(1.05);
     }
 
-    /* 🌸 ปุ่มแดชบอร์ดผู้ดูแลระบบ (ตรงกลางบาร์) */
     .btn-admin-center {
         background: linear-gradient(90deg, #FF69B4 0%, #ff3c9d 100%);
         color: #fff;
@@ -35,7 +33,7 @@
 
 <nav x-data="{ open: false }" class="relative bg-gradient-to-r from-pink-50 via-white to-pink-100 border-b border-pink-200 shadow-md">
 
-    <!-- 🔹 ปุ่มแดชบอร์ดตรงกลาง (เฉพาะแอดมิน/สตาฟ) -->
+    {{-- 🔹 ปุ่มแดชบอร์ดตรงกลาง --}}
     @if(auth()->user() && in_array(auth()->user()->role, ['admin','staff']))
         <div class="absolute left-1/2 -translate-x-1/2 -top-5 z-20">
             <a href="{{ route('admin.dashboard') }}"
@@ -48,7 +46,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div class="flex justify-between h-16 items-center">
 
-            <!-- 🔹 โลโก้ -->
+            {{-- 🔹 โลโก้ --}}
             <div class="flex items-center space-x-3">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     <img src="{{ asset('images/abc.jpg') }}" alt="Logo"
@@ -59,13 +57,13 @@
                 </a>
             </div>
 
-            <!-- 🔹 เมนูหลัก (Desktop) -->
+            {{-- 🔹 เมนูหลัก Desktop --}}
             <div class="hidden sm:flex items-center space-x-3">
                 <a href="{{ route('dashboard') }}" class="btn-outline px-4 py-2">
                     🏠 หน้าแรก
                 </a>
 
-                {{-- ✅ เมนูเฉพาะ "ผู้ใช้ทั่วไป" --}}
+                {{-- ✅ ผู้ใช้ทั่วไป --}}
                 @cannot('manage-bookings')
                     <a href="{{ route('booking.create') }}" class="btn-outline px-4 py-2">
                         ➕ จองอุปกรณ์ใหม่
@@ -75,28 +73,32 @@
                     </a>
                 @endcannot
 
-                {{-- ✅ เมนูเฉพาะ "แอดมิน/สตาฟ" --}}
+                {{-- ✅ แอดมิน/สตาฟ --}}
                 @can('manage-bookings')
                     <a href="{{ route('manage.bookings.review.index') }}" class="btn-outline px-4 py-2">
                         📝 พิจารณาการจอง
                     </a>
-                    {{-- 📦 ลบ “มารับอุปกรณ์” ออกแล้ว --}}
                     <a href="{{ route('manage.bookings.history.index') }}" class="btn-outline px-4 py-2">
                         📜 ประวัติการจองทั้งหมด
                     </a>
                     <a href="{{ route('booking.return.list') }}" class="btn-outline px-4 py-2">
                         📊 ตรวจสอบการคืน
                     </a>
-                    <a href="{{ route('manage.fines.index') }}" class="btn-outline px-4 py-2">
-                        💰 การคิดค่าปรับ
-                    </a>
+
+                    {{-- 💰 ซ่อนเมนู "การคิดค่าปรับ" ถ้าเป็นแอดมิน --}}
+                    @if(Auth::user()->role !== 'admin')
+                        <a href="{{ route('manage.fines.index') }}" class="btn-outline px-4 py-2">
+                            💰 การคิดค่าปรับ
+                        </a>
+                    @endif
+
                     <a href="{{ route('manage.masterdata.index') }}" class="btn-outline px-4 py-2">
                         ⚙️ จัดการข้อมูลพื้นฐาน
                     </a>
                 @endcan
             </div>
 
-            <!-- 🔹 โปรไฟล์ -->
+            {{-- 🔹 โปรไฟล์ --}}
             <div class="hidden sm:flex items-center">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
@@ -127,7 +129,7 @@
                 </x-dropdown>
             </div>
 
-            <!-- 🔹 Hamburger -->
+            {{-- 🔹 Hamburger Menu (Mobile) --}}
             <div class="-me-2 flex items-center sm:hidden">
                 <button @click="open = ! open"
                     class="p-2 rounded-md text-[#FF69B4] hover:bg-pink-100 focus:outline-none transition">
@@ -144,48 +146,49 @@
         </div>
     </div>
 
-    <!-- 🔹 เมนูมือถือ -->
+    {{-- 🔹 เมนูมือถือ --}}
     <div :class="{'block': open, 'hidden': !open}" class="sm:hidden bg-white border-t border-pink-100 shadow-inner">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+            <x-responsive-nav-link :href="route('dashboard')">
                 🏠 หน้าแรก
             </x-responsive-nav-link>
 
-            {{-- ✅ เฉพาะผู้ใช้ทั่วไป --}}
             @cannot('manage-bookings')
-                <x-responsive-nav-link :href="route('booking.create')" :active="request()->routeIs('booking.create')">
+                <x-responsive-nav-link :href="route('booking.create')">
                     ➕ จองอุปกรณ์ใหม่
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('pickups.mine')" :active="request()->routeIs('pickups.mine')">
+                <x-responsive-nav-link :href="route('pickups.mine')">
                     📅 กำหนดรับอุปกรณ์ของฉัน
                 </x-responsive-nav-link>
             @endcannot
 
-            {{-- ✅ เฉพาะแอดมิน/สตาฟ --}}
             @can('manage-bookings')
-                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                <x-responsive-nav-link :href="route('admin.dashboard')">
                     📊 แดชบอร์ดผู้ดูแลระบบ
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('manage.bookings.review.index')" :active="request()->routeIs('manage.bookings.review.*')">
+                <x-responsive-nav-link :href="route('manage.bookings.review.index')">
                     📝 พิจารณาการจอง
                 </x-responsive-nav-link>
-                {{-- 📦 ลบ “มารับอุปกรณ์” ออกแล้ว --}}
-                <x-responsive-nav-link :href="route('manage.bookings.history.index')" :active="request()->routeIs('manage.bookings.history.*')">
+                <x-responsive-nav-link :href="route('manage.bookings.history.index')">
                     📜 ประวัติการจองทั้งหมด
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('booking.return.list')">
                     📊 ตรวจสอบการคืน
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('manage.fines.index')">
-                    💰 การคิดค่าปรับ
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('manage.masterdata.index')" :active="request()->routeIs('manage.masterdata.*')">
+
+                {{-- 💰 ซ่อนเมนูค่าปรับจากแอดมิน --}}
+                @if(Auth::user()->role !== 'admin')
+                    <x-responsive-nav-link :href="route('manage.fines.index')">
+                        💰 การคิดค่าปรับ
+                    </x-responsive-nav-link>
+                @endif
+
+                <x-responsive-nav-link :href="route('manage.masterdata.index')">
                     ⚙️ จัดการข้อมูลพื้นฐาน
                 </x-responsive-nav-link>
             @endcan
         </div>
 
-        <!-- 🔹 ผู้ใช้ -->
         <div class="pt-4 pb-1 border-t border-pink-100 bg-pink-50">
             <div class="px-4">
                 <div class="font-semibold text-gray-800">{{ Auth::user()->name }}</div>
